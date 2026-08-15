@@ -9,7 +9,7 @@ ORDERING can be one of:
   - :random
 Tests that are disabled are not run."))
 
-(defmethod sequence-tests ((sequencer test-sequencer) tests)
+(defmethod sequence-tests ((sequencer simple-test-sequencer) tests)
   (case (test-sequencer-ordering sequencer)
     (:declaration-order
      ;; the tests are added by push, hence in reverse declaration order.
