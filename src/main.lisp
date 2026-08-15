@@ -7,8 +7,9 @@
   "Add a test to the framework.
 If the parent is given, the test is PUSHed into it instead of *TESTS*.
 The body should return NIL to pass. Use an assertion macro to set up proper error messages."
-  (let ((test-container (or parent '*tests*)))
-    `(push (make-instance 'simple-test :name ,name :body '(progn ,@body)) ,test-container)))
+  (let ((test-container (or parent '*tests*))
+        (test-name (if (symbolp name) (symbol-name name) name)))
+    `(push (make-instance 'simple-test :name ,test-name :body '(progn ,@body)) ,test-container)))
 
 (defun test (&key
                (tests *tests*)
