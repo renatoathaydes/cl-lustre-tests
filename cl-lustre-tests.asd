@@ -11,6 +11,11 @@
   :version     "0.1.0"
   :depends-on  ("format-ansi")
   :serial t
-  :pathname "src"
   :components ((:file "package")
-               (:file "main" :depends-on ("package"))))
+               (:file "protocol" :depends-on ("package"))
+               (:file "test-result" :depends-on ("protocol"))
+               (:file "test-instance" :depends-on ("protocol"))
+               (:file "test-parent" :depends-on ("test-instance"))
+               (:file "test-reporter" :depends-on ("protocol"))
+               (:file "test-sequencer" :depends-on ("protocol"))
+               (:file "main" :depends-on ("test-reporter" "test-sequeencer"))))
