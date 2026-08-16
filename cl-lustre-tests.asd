@@ -32,4 +32,4 @@
   :components ((:file "package")
                (:file "main" :depends-on ("package")))
   :perform (asdf:test-op (op c)
-                         (uiop:symbol-call :lustre-tests/tests :run-tests)))
+                         (uiop:symbol-call :lustre-tests/tests :run-tests :on-error :exit)))
