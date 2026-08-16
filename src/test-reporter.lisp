@@ -21,7 +21,7 @@
 (defmethod report-start (stream (reporter ansi-test-reporter) tests)
   (unless tests (error "No tests added"))
   (ansi:format-ansi stream `((:fg :green
-                                  "== LUSTRE TESTS ==%Running ~A test(s).~%"
+                                  "== LUSTRE TESTS ==~%Running ~A test(s).~%"
                                   ,(length tests)))))
 
 (defmethod report-result (stream (reporter counting-test-reporter) (test test-object))

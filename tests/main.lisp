@@ -26,15 +26,35 @@
 
 ;; end-to-end tests
 
+(defun assert-strings-equal (test-name actual expected)
+  (unless (string= expected actual)
+    (error (with-output-to-string (s)
+      (format s "~A FAILED~%" test-name)
+      (format s "Expected: ~S~%" expected)
+      (format s "Actual:   ~S~%" actual)
+      (format s "Difference at position ~D:~%"
+              (or (mismatch expected actual) (length expected)))))))
+
 (define-lustre-test report-successful-tests-correctly-by-default
   (let ((all-tests nil))
     (lustre-tests:deftest test-2+2=4 (all-tests) (= (+ 2 2) 4))
     (lustre-tests:deftest test-string (all-tests) (string= (string #\A) "A"))
-    (let ((result 
+    (let ((result
             (with-output-to-string (stream)
-              (lustre-tests:test :stream stream :tests all-tests)
-              (get-output-stream-string stream))))
-      (assert (string= result "== LUSTRE TESTS ==Running 2 test(s).")))))
+              (lustre-tests:test :stream stream :tests all-tests))))
+      (assert-strings-equal
+       'report-successful-tests-correctly-by-default
+       result
+       (concatenate 'string
+                    (ansi:format-ansi nil `((:fg :green "== LUSTRE TESTS ==~%Running 2 test(s).~%")
+                                            ("") ;; separation between format-ansi calls in impl
+                                            (:fg :green "OK: ")
+                                            (:st :bold "TEST-2+2=4~%")
+                                            ("")
+                                            (:fg :green "OK: ")
+                                            (:st :bold "TEST-STRING~%")))
+                    "Success: 2, Failures: 0, Errors: 0"
+                    '(#\NEWLINE))))))
 
 ;; TODO:
 ;;  - use define-test so emacs highlights it better
