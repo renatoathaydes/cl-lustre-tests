@@ -20,8 +20,9 @@
 
 (defmethod report-start (stream (reporter ansi-test-reporter) tests)
   (unless tests (error "No tests added"))
-  (ansi:format-ansi stream `((:fg :green "== LUSTRE TESTS ==")
-                             ,(format nil "~%Running ~A test(s).~%" (length tests)))))
+  (ansi:format-ansi stream `((:fg :green
+                                  "== LUSTRE TESTS ==%Running ~A test(s).~%"
+                                  ,(length tests)))))
 
 (defmethod report-result (stream (reporter counting-test-reporter) (test test-object))
   (case (test-result-status (test-result test))
@@ -45,17 +46,16 @@
     (case (test-result-status result)
       (:ok
        (ansi:format-ansi stream `((:fg :green "OK: ")
-                                  (:st :bold ,(test-name test))
-                                  ,(string #\Newline))))
+                                  (:st :bold "~A~%" ,(test-name test)))))
       (:error
        (ansi:format-ansi stream `((:fg :red "ERROR: ")
-                                  (:st :bold ,(test-name test))
-                                  ,(format nil " ~A~%" (test-result-description result)))))
+                                  (:fg :red :st :bold "~A" ,(test-name test))
+                                  (:fg :red " ~A~%" ,(test-result-description result)))))
       (otherwise
-       (ansi:format-ansi stream `((:fg :yellow ,(format stream "~A: " (test-result-status result)))
-                                  (:st :bold :fg :red ,(test-name test))
-                                  ,(format nil " ~A~%" (test-result-description result))))))))
+       (ansi:format-ansi stream `((:fg :yellow "~A: " ,(test-result-status result))
+                                  (:fg :yellow :st :bold "~A" ,(test-name test))
+                                  (:fg :yellow " ~A~%" ,(test-result-description result))))))))
 
 (defmethod report-end (stream (reporter counting-test-reporter) tests)
   (with-slots (ok-count fail-count error-count) reporter
-    (format T "Success: ~A, Failures: ~A, Errors: ~A~%" ok-count fail-count error-count)))
+    (format stream "Success: ~A, Failures: ~A, Errors: ~A~%" ok-count fail-count error-count)))
