@@ -59,3 +59,10 @@
 (defmethod report-end (stream (reporter counting-test-reporter) tests)
   (with-slots (ok-count fail-count error-count) reporter
     (format stream "Success: ~A, Failures: ~A, Errors: ~A~%" ok-count fail-count error-count)))
+
+(defmethod report-end (stream (reporter ansi-test-reporter) tests)
+  (with-slots (ok-count fail-count error-count) reporter
+    (ansi:format-ansi stream
+                      `((:fg :green "Success: ~A, " ,ok-count)
+                        (:fg :yellow "Failures: ~A, " ,fail-count)
+                        (:fg :red "Errors: ~A~%" ,error-count)))))
