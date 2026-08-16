@@ -17,4 +17,5 @@
            #:simple-test-sequencer
            #:counting-test-reporter
            #:simple-test-reporter
-           #:ansi-test-reporter))
+           #:ansi-test-reporter
+           #:test-error))

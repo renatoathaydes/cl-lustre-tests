@@ -22,8 +22,16 @@ To execute all tests, invoke TEST."))
 It can also do other things, such as skip disabled tests, let tests run more than once etc.
 It must not create tests itself."))
 
+(define-condition test-error (error)
+  ((reason :initarg :reason :reader test-error-reason
+           :initform "Test error."))
+  (:documentation "A TEST-ERROR is a condition triggered when a test or set of tests did not run successfully.")
+  (:report (lambda (condition stream)
+             (format stream "Test Error: ~A~&" (test-error-reason condition)))))
+
 (defgeneric eval-test (test)
-  (:documentation "Run a TEST-OBJECT.")
+  (:documentation "Run a TEST-OBJECT.
+Return the TEST-OBJECT with its TEST-RESULT having been set.")
   (:method ((test test-object))
     (error "EVAL-TEST not implemented for TEST-OBJECT.")))
 
