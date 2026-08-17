@@ -3,7 +3,7 @@
   (:documentation "The cl-lustre-tests package.")
   (:export #:test
            #:*root-test-parent*
-           #:deftest
+           #:define-test
            #:test-object
            #:test-result
            #:test-reporter

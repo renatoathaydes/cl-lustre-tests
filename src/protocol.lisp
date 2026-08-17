@@ -14,7 +14,7 @@ All TEST-OBJECT should be added to a TEST-PARENT so it can be run by the TEST fu
   ((result :accessor test-result :initarg :result
            :initform nil)
    (enabled :accessor :test-enabled? :initarg :enabled :initform T))
-  (:documentation "A test object. Usually created by the deftest macro.
+  (:documentation "A test object. Usually created by the define-test macro.
 Tests can be evaluated individually by EVAL-TEST. After the test runs,
 it should have a non-null RESULT which is a TEST-RESULT.
 To execute all tests, invoke TEST."))

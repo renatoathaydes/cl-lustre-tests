@@ -3,7 +3,7 @@
 (defparameter *root-test-parent* (make-instance 'test-parent)
   "The root of the test hierarchy. Execute all tests by invoking TEST.")
 
-(defmacro deftest (name (&optional parent) &body body)
+(defmacro define-test (name (&optional parent) &body body)
   "Add a test to the framework.
 If the parent is given, the test is added to it instead of *ROOT-TEST-PARENT*.
 The body should return NIL to pass. Use an assertion macro to set up proper error messages."

@@ -2,8 +2,8 @@
 
 (define-lustre-test report-successful-tests-correctly-by-default
   (let ((all-tests (make-instance 'lustre-tests:test-parent)))
-    (lustre-tests:deftest test-2+2=4 (all-tests) (= (+ 2 2) 4))
-    (lustre-tests:deftest test-string (all-tests) (string= (string #\A) "A"))
+    (lustre-tests:define-test test-2+2=4 (all-tests) (= (+ 2 2) 4))
+    (lustre-tests:define-test test-string (all-tests) (string= (string #\A) "A"))
     (let ((result
             (with-output-to-string (stream)
               (lustre-tests:test :stream stream :test-parent all-tests))))
@@ -23,8 +23,3 @@
           (:fg :green "Success: 2, ")
           (:fg :yellow "Failures: 0, ")
           (:fg :red "Errors: 0~%")))))))
-
-;; TODO:
-;;  - use define-test so emacs highlights it better
-;;  - make test bodies actual functions so we can recompile tests more easily?
-
