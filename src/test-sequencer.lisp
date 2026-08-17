@@ -17,3 +17,11 @@ Tests that are disabled are not run."))
     (:reverse-declaration-order tests)
     ;; TODO shuffle the list
     (:random tests)))
+
+(defmethod sequence-parents ((sequencer simple-test-sequencer) parents)
+  (case (test-sequencer-ordering sequencer)
+    (:declaration-order
+     (reverse parents))
+    (:reverse-declaration-order parents)
+    ;; TODO shuffle the list
+    (:random parents)))

@@ -5,6 +5,11 @@
   (:documentation "The result of running a test.
 It should be pretty-printable so it can be shown in test reports."))
 
+(defclass test-parent ()
+  ((children :accessor test-children :initarg :children :initform nil))
+  (:documentation "A group of tests.
+All TEST-OBJECT should be added to a TEST-PARENT so it can be run by the TEST function."))
+
 (defclass test-object ()
   ((result :accessor test-result :initarg :result
            :initform nil)
@@ -40,9 +45,14 @@ Return the TEST-OBJECT with its TEST-RESULT having been set.")
   (:method ((sequencer test-sequencer) tests)
     (error "SEQUENCE-TESTS not implemented for TEST-SEQUENCER.")))
 
-(defgeneric report-start (stream reporter tests)
-  (:documentation "Reports that tests are about to start running.")
-  (:method (stream (reporter test-reporter) tests)
+(defgeneric sequence-parents (sequencer parents)
+  (:documentation "Returns a LIST of TEST-PARENTs to run.")
+  (:method ((sequencer test-sequencer) parents)
+    (error "SEQUENCE-PARENTS not implemented for TEST-SEQUENCER.")))
+
+(defgeneric report-start (stream reporter parent)
+  (:documentation "Reports that tests in the PARENT are about to start running.")
+  (:method (stream (reporter test-reporter) parent)
     (error "REPORT-START not implemented for TEST-REPORTER.")))
 
 (defgeneric report-result (stream reporter test)
@@ -50,8 +60,8 @@ Return the TEST-OBJECT with its TEST-RESULT having been set.")
   (:method (stream (reporter test-reporter) (test test-object))
     (error "REPORT-RESULT not implemented for TEST-REPORTER.")))
 
-(defgeneric report-end (stream reporter tests)
-  (:documentation "Reports that all tests in the previous REPORT-START call have run.")
-  (:method (stream (reporter test-reporter) tests)
+(defgeneric report-end (stream reporter parent)
+  (:documentation "Reports that tests in the PARENT have finished running.")
+  (:method (stream (reporter test-reporter) parent)
     (error "REPORT-END not implemented for TEST-REPORTER.")))
 

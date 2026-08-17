@@ -11,18 +11,17 @@
   (:documentation "A simple TEST-REPORTER. Suitable for interactive Lisp sessions."))
 
 (defclass ansi-test-reporter (counting-test-reporter)
-  ((ansi-enabled :initarg :ansi-enabled :initform T))
+  ((ansi-enabled :initarg :ansi-enabled :initform T
+                 :accessor ansi-enabled?))
   (:documentation "Default TEST-REPORTER. Uses FORMAT-ANSI to provide colorful terminal reports."))
 
-(defmethod report-start (stream (reporter simple-test-reporter) tests)
-  (unless tests (error "No tests added"))
-  (format stream "== LUSTRE TESTS ==~%~%Running ~A test(s).~%" (length tests)))
+(defmethod report-start (stream (reporter simple-test-reporter) parent)
+  (format stream "== LUSTRE TESTS ==~%~%Running ~A test(s).~%" (count-tests parent)))
 
-(defmethod report-start (stream (reporter ansi-test-reporter) tests)
-  (unless tests (error "No tests added"))
+(defmethod report-start (stream (reporter ansi-test-reporter) parent)
   (ansi:format-ansi stream `((:fg :green
                                   "== LUSTRE TESTS ==~%Running ~A test(s).~%"
-                                  ,(length tests)))))
+                                  ,(count-tests parent)))))
 
 (defmethod report-result (stream (reporter counting-test-reporter) (test test-object))
   (case (test-result-status (test-result test))
@@ -56,11 +55,11 @@
                                   (:fg :yellow :st :bold "~A" ,(test-name test))
                                   (:fg :yellow " ~A~%" ,(test-result-description result))))))))
 
-(defmethod report-end (stream (reporter counting-test-reporter) tests)
+(defmethod report-end (stream (reporter counting-test-reporter) parent)
   (with-slots (ok-count fail-count error-count) reporter
     (format stream "Success: ~A, Failures: ~A, Errors: ~A~%" ok-count fail-count error-count)))
 
-(defmethod report-end (stream (reporter ansi-test-reporter) tests)
+(defmethod report-end (stream (reporter ansi-test-reporter) parent)
   (with-slots (ok-count fail-count error-count) reporter
     (ansi:format-ansi stream
                       `((:fg :green "Success: ~A, " ,ok-count)
