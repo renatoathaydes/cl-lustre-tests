@@ -29,7 +29,12 @@
   :version     "0.1.0"
   :depends-on  ("format-ansi" "cl-lustre-tests")
   :pathname "tests"
+  :serial t
   :components ((:file "package")
-               (:file "main" :depends-on ("package")))
+               (:file "basic-test-framework")
+               (:file "deftest-tests")
+               (:file "end-to-end-tests")
+               (:file "test-runner"))
   :perform (asdf:test-op (op c)
+                         ;; on-error -> :condition | :print | :exit
                          (uiop:symbol-call :lustre-tests/tests :run-tests :on-error :exit)))

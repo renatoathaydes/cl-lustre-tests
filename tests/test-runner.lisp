@@ -1,0 +1,27 @@
+(in-package #:lustre-tests/tests)
+
+(defmacro run-test (name)
+  `(handler-case (progn
+                    (funcall ,name)
+                    (incf success-count))
+     (error (e)
+       (incf error-count)
+       (format T "ERROR: ~A~%  ~A~%" (symbol-name ,name) e))))
+
+(defun run-tests (&key (on-error :condition))
+  "Run the tests.
+The ERROR-MODE should be one of :condition | :print | :exit."
+  (format T "Running Lustre Tests' own tests!~%")
+  (let ((error-count 0)
+        (success-count 0))
+    (dolist (test *tests*) (run-test test))
+    (if (zerop error-count)
+        (ansi:format-ansi T `((:fg :green "OK - all ~A test(s) passed!~%" ,success-count)))
+        (flet ((print-results ()
+                 (ansi:format-ansi T `((:fg :red "Not OK: ~A error(s), ~A OK.~%" ,error-count ,success-count)))))
+          (ecase on-error
+            (:condition (error 'lustre-tests:test-error
+                               :reason `(:success-count ,success-count :error-count ,error-count)))
+            (:print (print-results))
+            (:exit (print-results)
+             (uiop:quit 1)))))))

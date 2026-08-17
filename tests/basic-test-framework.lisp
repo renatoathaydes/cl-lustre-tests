@@ -1,0 +1,23 @@
+(in-package #:lustre-tests/tests)
+
+;;;; Tiniest test framework in the world ;;;;
+
+;; Tests are just functions whose names are pushed into *tests*.
+
+(defparameter *tests* nil)
+
+(defmacro define-lustre-test (name &body body)
+  `(progn
+     (defun ,name () ,@body)
+     (pushnew ',name *tests*)))
+
+;; Hard to test ANSI output without an assertion to help with that.
+
+(defun assert-strings-equal (test-name actual expected)
+  (unless (string= expected actual)
+    (error (with-output-to-string (s)
+      (format s "~A FAILED~%" test-name)
+      (format s "Expected: ~S~%" expected)
+      (format s "Actual:   ~S~%" actual)
+      (format s "Difference at position ~D:~%"
+              (or (mismatch expected actual) (length expected)))))))
