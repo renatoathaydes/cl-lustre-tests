@@ -1,18 +1,34 @@
 (in-package #:lustre-tests)
 
-(defparameter *root-test-parent* (make-instance 'test-parent)
+(defparameter *root-test-parent* nil
   "The root of the test hierarchy. Execute all tests by invoking TEST.")
 
-(defmacro define-test (name (&optional parent) &body body)
+(defun init-root ()
+  (if *root-test-parent*
+      *root-test-parent*
+      (setf *root-test-parent* (make-instance 'test-parent :name 'root))))
+
+(defun make-test-name (name)
+  "Convert the name to a SYMBOL."
+  (typecase name
+    (string (intern name))
+    (symbol name)
+    (number (intern (format nil "~D" name)))
+    (otherwise (error "Name must be string | symbol | number."))))
+
+(defmacro define-test (name (&rest parents) &body body)
   "Add a test to the framework.
-If the parent is given, the test is added to it instead of *ROOT-TEST-PARENT*.
+If PARENTS are given, the test location matching the names of the parents is found or created.
 The body should return NIL to pass. Use an assertion macro to set up proper error messages."
-  (let ((test-container (or parent '*root-test-parent*))
-        (test-name (if (symbolp name) (symbol-name name) name)))
-    `(add-test (make-instance 'simple-test :name ,test-name :body '(progn ,@body)) ,test-container)))
+  (let ((test-name (gensym)))
+    `(let ((,test-name (make-test-name ',name)))
+       (add-test
+        (make-instance 'simple-test :name ,test-name :body '(progn ,@body))
+        (init-root)
+        (mapcar #'make-test-name ',parents)))))
 
 (defun test (&key
-               (test-parent *root-test-parent*)
+               (test-parent (init-root))
                (stream *standard-output*)
                (sequencer (make-instance 'simple-test-sequencer))
                (reporter (make-instance 'ansi-test-reporter))

@@ -6,12 +6,17 @@
 It should be pretty-printable so it can be shown in test reports."))
 
 (defclass test-parent ()
-  ((children :accessor test-children :initarg :children :initform nil))
+  ((name :reader test-name :initarg :name
+         :initform (error "test-parent name must be provided"))
+   (children :accessor test-children :initarg :children :initform nil))
   (:documentation "A group of tests.
-All TEST-OBJECT should be added to a TEST-PARENT so it can be run by the TEST function."))
+All TEST-OBJECT instances should be added to a TEST-PARENT so they can be run by the TEST function.
+Use the DEFINE-TEST or ADD-TEST forms for that purpose."))
 
 (defclass test-object ()
-  ((result :accessor test-result :initarg :result
+  ((name :reader test-name :initarg :name
+         :initform (error "test-object name must be provided"))
+   (result :accessor test-result :initarg :result
            :initform nil)
    (enabled :accessor :test-enabled? :initarg :enabled :initform T))
   (:documentation "A test object. Usually created by the define-test macro.

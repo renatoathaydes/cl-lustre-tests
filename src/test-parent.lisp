@@ -1,8 +1,39 @@
 (in-package #:lustre-tests)
 
-(defun add-test (test parent)
-  "Adds a test to a parent."
-  (push test (test-children parent)))
+(defun tests-equalp (t1 t2)
+  (and (eq (type-of t1) (type-of t2))
+       (eq (test-name t1) (test-name t2))))
+
+(defun find-child (name parent)
+  (find-if (lambda (child)
+             (eq name (test-name child)))
+           (test-children parent)))
+
+(defun add-child (test parent)
+  "Add a TEST to a PARENT, ensuring name uniqueness under the TEST-PARENT
+by replacing any existing tests with the same name."
+  (pushnew test (test-children parent) :test #'tests-equalp))
+
+(defun add-test (test parent &optional parent-names)
+  "Add a TEST to a PARENT, using PARENT-NAMES to make or find intermediate test parents."
+  (if (null parent-names)
+      (add-child test parent)
+      (let ((new-parent (make-instance 'test-parent :name (car parent-names))))
+        (add-child new-parent parent)
+        (add-test test new-parent (cdr parent-names)))))
+
+(defun print-test-tree (parent &optional (stream *standard-output*))
+  "Print a test tree."
+  (let ((indent ""))
+    (flet ((on-start-parent (p)
+             (format stream "~A* ~A~%" indent (test-name p))
+             (setq indent (concatenate 'string indent "  ")))
+           (on-end-parent (p)
+             (declare (ignore p))
+             (setq indent (subseq indent 0 (- (length indent) 2))))
+           (on-child (c)
+             (format stream "~A- ~A~%" indent (test-name c))))
+      (dotests parent #'on-child #'on-start-parent #'on-end-parent))))
 
 (defun count-tests (parent)
   "Count how many tests are included in the TEST-PARENT.

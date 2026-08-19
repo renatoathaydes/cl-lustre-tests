@@ -2,15 +2,17 @@
   (:use #:cl)
   (:documentation "The cl-lustre-tests package.")
   (:export #:test
-           #:*root-test-parent*
            #:define-test
+           #:make-test-name
            #:test-object
            #:test-result
            #:test-reporter
            #:test-sequencer
            #:test-parent
-           ;; functions and methods
            #:add-test
+           #:add-child
+           #:find-child
+           #:print-test-tree
            #:count-tests
            #:dotests
            #:eval-test
@@ -31,9 +33,8 @@
            ;; test-parent slots
            #:test-children
            ;; test-object slots
-           #:test-enabled?
-           ;; simple-test slots
            #:test-name
+           #:test-enabled?
            ;; ansi-test-reporter slots
            #:ansi-enabled?
            ;; simple-test-sequencer slots

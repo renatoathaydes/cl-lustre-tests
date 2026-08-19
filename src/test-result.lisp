@@ -18,5 +18,6 @@ It should be pretty-printable so it can be shown in test reports."))
           (format stream full-format status description)
           (format stream short-format status)))))
 
-(defmethod make-load-form ((result simple-test-result) &optional environment)
-  (make-load-form-saving-slots result :environment environment))
+;;(defmethod make-load-form ((result simple-test-result) &optional environment)
+;;  (make-load-form-saving-slots result :environment environment))
+;;

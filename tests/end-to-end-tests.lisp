@@ -1,12 +1,12 @@
 (in-package #:lustre-tests/tests)
 
 (define-lustre-test report-successful-tests-correctly-by-default
-  (let ((all-tests (make-instance 'lustre-tests:test-parent)))
-    (lustre-tests:define-test test-2+2=4 (all-tests) (= (+ 2 2) 4))
-    (lustre-tests:define-test test-string (all-tests) (string= (string #\A) "A"))
+  (with-local-root (root)
+    (lustre-tests:define-test test-2+2=4 () (= (+ 2 2) 4))
+    (lustre-tests:define-test test-string (string-tests) (string= (string #\A) "A"))
     (let ((result
             (with-output-to-string (stream)
-              (lustre-tests:test :stream stream :test-parent all-tests))))
+              (lustre-tests:test :stream stream :test-parent root))))
       (assert-strings-equal
        'report-successful-tests-correctly-by-default
        result

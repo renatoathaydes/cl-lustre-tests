@@ -21,3 +21,8 @@
       (format s "Actual:   ~S~%" actual)
       (format s "Difference at position ~D:~%"
               (or (mismatch expected actual) (length expected)))))))
+
+(defmacro with-local-root ((root) &body body)
+  `(let* ((lustre-tests::*root-test-parent* (make-instance 'lustre-tests:test-parent :name 'ROOT))
+          (,root lustre-tests::*root-test-parent*))
+     ,@body))

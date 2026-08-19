@@ -1,9 +1,7 @@
 (in-package #:lustre-tests)
 
 (defclass simple-test (test-object)
-  ((name :reader test-name :initarg :name
-         :initform (error "must supply :name"))
-   (body :reader test-body :initarg :body
+  ((body :reader test-body :initarg :body
          :initform (error "must supply :body")))
   (:documentation "A SIMPLE-TEST contains a BODY that is a form that can be evaluated when
 the test runs."))
