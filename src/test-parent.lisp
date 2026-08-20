@@ -12,7 +12,12 @@
 (defun add-child (test parent)
   "Add a TEST to a PARENT, ensuring name uniqueness under the TEST-PARENT
 by replacing any existing tests with the same name."
-  (pushnew test (test-children parent) :test #'tests-equalp))
+  (mapl (lambda (c)
+          (when (tests-equalp test (car c))
+            (setf (car c) test)
+            (return-from add-child)))
+        (test-children parent))
+  (push test (test-children parent)))
 
 (defun add-test (test parent &optional parent-names)
   "Add a TEST to a PARENT, using PARENT-NAMES to make or find intermediate test parents."
