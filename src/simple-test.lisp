@@ -10,7 +10,7 @@ the test runs."))
   "Evaluate this test.
    Returns the TEST-INSTANCE with its result having been set."
   (let* ((result (handler-case
-                     (eval (test-body test))
+                     (funcall (test-body test))
                    (error (e) (make-test-result :error e))))
          (t-result (typecase result
                      (test-result result)

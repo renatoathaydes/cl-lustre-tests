@@ -23,7 +23,7 @@ The body should return NIL to pass. Use an assertion macro to set up proper erro
   (let ((test-name (gensym)))
     `(let ((,test-name (make-test-name ',name)))
        (add-test
-        (make-instance 'simple-test :name ,test-name :body '(progn ,@body))
+        (make-instance 'simple-test :name ,test-name :body (lambda () ,@body))
         (init-root)
         (mapcar #'make-test-name ',parents)))))
 
@@ -43,7 +43,7 @@ The test protocol is as follows:
 If SIGNAL-CONDITION-ON-ERROR? is not NIL, a TEST-ERROR is signalled on each test failure or error."
   (let ((ctx nil))
     (flet ((on-start-parent (p)
-             (setq ctx (report-start stream reporter p ctx)))
+             (setf ctx (report-start stream reporter p ctx)))
            (on-end-parent (p)
              (report-end stream reporter p ctx))
            (on-child (test)
@@ -52,7 +52,7 @@ If SIGNAL-CONDITION-ON-ERROR? is not NIL, a TEST-ERROR is signalled on each test
                (when (null result)
                  (error "Test ~A has no result after being run." test))
                (when (and signal-condition-on-error?
-                          (not (eq :ok (test-result-status result))))
+                          (not (eql :ok (test-result-status result))))
                  (error 'test-error :reason (test-result-description result)))
                (report-result stream reporter test ctx))))
       (dotests test-parent #'on-child #'on-start-parent #'on-end-parent sequencer))))

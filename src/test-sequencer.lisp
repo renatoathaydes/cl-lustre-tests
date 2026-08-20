@@ -10,7 +10,7 @@ ORDERING can be one of:
 Tests that are disabled are not run."))
 
 (defmethod sequence-tests ((sequencer simple-test-sequencer) tests)
-  (case (test-sequencer-ordering sequencer)
+  (ecase (test-sequencer-ordering sequencer)
     (:declaration-order
      ;; the tests are added by push, hence in reverse declaration order.
      (reverse tests))
@@ -19,7 +19,7 @@ Tests that are disabled are not run."))
     (:random tests)))
 
 (defmethod sequence-parents ((sequencer simple-test-sequencer) parents)
-  (case (test-sequencer-ordering sequencer)
+  (ecase (test-sequencer-ordering sequencer)
     (:declaration-order
      (reverse parents))
     (:reverse-declaration-order parents)
