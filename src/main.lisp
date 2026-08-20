@@ -6,7 +6,7 @@
 (defun init-root ()
   (if *root-test-parent*
       *root-test-parent*
-      (setf *root-test-parent* (make-instance 'test-parent :name 'root))))
+      (setf *root-test-parent* (make-instance 'test-parent :name 'ROOT))))
 
 (defun make-test-name (name)
   "Convert the name to a SYMBOL."
@@ -41,17 +41,18 @@ The test protocol is as follows:
   - report-result (for each test)
   - report-end
 If SIGNAL-CONDITION-ON-ERROR? is not NIL, a TEST-ERROR is signalled on each test failure or error."
-  (flet ((on-start-parent (p)
-           (report-start stream reporter p))
-         (on-end-parent (p)
-           (report-end stream reporter p))
-         (on-child (test)
-           (eval-test test)
-           (let ((result (test-result test)))
-             (when (null result)
-               (error "Test ~A has no result after being run." test))
-             (when (and signal-condition-on-error?
-                        (not (eq :ok (test-result-status result))))
-               (error 'test-error :reason (test-result-description result)))
-             (report-result stream reporter test))))
-    (dotests test-parent #'on-child #'on-start-parent #'on-end-parent sequencer)))
+  (let ((ctx nil))
+    (flet ((on-start-parent (p)
+             (setq ctx (report-start stream reporter p ctx)))
+           (on-end-parent (p)
+             (report-end stream reporter p ctx))
+           (on-child (test)
+             (eval-test test)
+             (let ((result (test-result test)))
+               (when (null result)
+                 (error "Test ~A has no result after being run." test))
+               (when (and signal-condition-on-error?
+                          (not (eq :ok (test-result-status result))))
+                 (error 'test-error :reason (test-result-description result)))
+               (report-result stream reporter test ctx))))
+      (dotests test-parent #'on-child #'on-start-parent #'on-end-parent sequencer))))

@@ -55,18 +55,22 @@ Return the TEST-OBJECT with its TEST-RESULT having been set.")
   (:method ((sequencer test-sequencer) parents)
     (error "SEQUENCE-PARENTS not implemented for TEST-SEQUENCER.")))
 
-(defgeneric report-start (stream reporter parent)
-  (:documentation "Reports that tests in the PARENT are about to start running.")
-  (:method (stream (reporter test-reporter) parent)
+(defgeneric report-start (stream reporter parent ctx)
+  (:documentation "Reports that tests in the PARENT are about to start running.
+Returns the CTX for the next calls.
+The CTX parameter is nil on the first call.
+Notice that nested TEST-PARENTs results in this method being called multiple times
+for each TEST invocation.")
+  (:method (stream (reporter test-reporter) parent ctx)
     (error "REPORT-START not implemented for TEST-REPORTER.")))
 
-(defgeneric report-result (stream reporter test)
+(defgeneric report-result (stream reporter test ctx)
   (:documentation "Reports a test result.")
-  (:method (stream (reporter test-reporter) (test test-object))
+  (:method (stream (reporter test-reporter) (test test-object) ctx)
     (error "REPORT-RESULT not implemented for TEST-REPORTER.")))
 
-(defgeneric report-end (stream reporter parent)
+(defgeneric report-end (stream reporter parent ctx)
   (:documentation "Reports that tests in the PARENT have finished running.")
-  (:method (stream (reporter test-reporter) parent)
+  (:method (stream (reporter test-reporter) parent ctx)
     (error "REPORT-END not implemented for TEST-REPORTER.")))
 

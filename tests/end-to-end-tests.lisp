@@ -12,12 +12,15 @@
        result
        (ansi:format-ansi
         nil
-        `((:fg :green "== LUSTRE TESTS ==~%Running 2 test(s).~%")
+        `(("== LUSTRE TESTS ==~%")
+          (:st :italic "Running 2 test(s).~%")
           ("") ;; separation between format-ansi calls in impl
           (:fg :green "OK: ")
           (:st :bold "TEST-2+2=4~%")
           ("")
-          (:fg :green "OK: ")
+          (:st :bold :fg :cyan "  >> STRING-TESTS~%")
+          ("")
+          (:fg :green "  OK: ")
           (:st :bold "TEST-STRING~%")
           ("")
           (:fg :green "Success: 2, ")

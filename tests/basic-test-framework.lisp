@@ -23,6 +23,8 @@
               (or (mismatch expected actual) (length expected)))))))
 
 (defmacro with-local-root ((root) &body body)
-  `(let* ((lustre-tests::*root-test-parent* (make-instance 'lustre-tests:test-parent :name 'ROOT))
-          (,root lustre-tests::*root-test-parent*))
+  `(let* ((lustre-tests::*root-test-parent*
+            (make-instance 'lustre-tests:test-parent :name 'lustre-tests::ROOT))
+          (,root
+            lustre-tests::*root-test-parent*))
      ,@body))
