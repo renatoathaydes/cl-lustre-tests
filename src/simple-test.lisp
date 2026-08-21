@@ -2,7 +2,9 @@
 
 (defclass simple-test (test-object)
   ((body :reader test-body :initarg :body
-         :initform (error "must supply :body")))
+         :initform (error "must supply :body"))
+   (fun :reader test-fun :initarg :fun
+        :initform (error "must supply :fun")))
   (:documentation "A SIMPLE-TEST contains a BODY that is a form that can be evaluated when
 the test runs."))
 
@@ -10,7 +12,7 @@ the test runs."))
   "Evaluate this test.
    Returns the TEST-INSTANCE with its result having been set."
   (let* ((result (handler-case
-                     (funcall (test-body test))
+                     (funcall (test-fun test))
                    (error (e) (make-test-result :error e))))
          (t-result (typecase result
                      (test-result result)

@@ -23,6 +23,6 @@
       (assert (= 1 (length (lustre-tests:test-children root))))
       ;; the latest test defined wins
       (assert (eql (funcall
-                    (lustre-tests::test-body
+                    (lustre-tests::test-fun
                      (lustre-tests:find-child 'my-test parent)))
                    :SECOND)))))

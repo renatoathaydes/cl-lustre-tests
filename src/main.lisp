@@ -23,7 +23,9 @@ The body should return NIL to pass. Use an assertion macro to set up proper erro
   (let ((test-name (gensym)))
     `(let ((,test-name (make-test-name ',name)))
        (add-test
-        (make-instance 'simple-test :name ,test-name :body (lambda () ,@body))
+        (make-instance 'simple-test :name ,test-name
+                                    :body '(,@body)
+                                    :fun (lambda () ,@body))
         (init-root)
         (mapcar #'make-test-name ',parents)))))
 
