@@ -19,8 +19,10 @@ the test runs."))
                      (T ;; consider the result a BOOLEAN meaning OK
                       (make-test-result
                        (if result :ok :fail)
-                       (if result
-                           nil
-                           (format nil "~A => ~A" (test-body test) result)))))))
+                       (unless result
+                         (with-output-to-string (s)
+                           (lustre-tests/color-sexp:color-sexp
+                            (test-body test) s)
+                           (format s " => ~A"  result))))))))
     (setf (test-result test) t-result)
     test))

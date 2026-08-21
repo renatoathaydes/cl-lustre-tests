@@ -11,15 +11,20 @@
   :license     "MIT"
   :version     "0.1.0"
   :depends-on  ("format-ansi")
-  :pathname "src"
-  :components ((:file "package")
-               (:file "protocol" :depends-on ("package"))
-               (:file "test-result" :depends-on ("protocol"))
-               (:file "simple-test" :depends-on ("protocol"))
-               (:file "test-parent" :depends-on ("protocol"))
-               (:file "test-reporter" :depends-on ("protocol"))
-               (:file "test-sequencer" :depends-on ("protocol"))
-               (:file "main" :depends-on ("test-reporter" "test-sequencer")))
+  :components ((:module "color-sexp"
+                :pathname "src/color-sexp"
+                :components ((:file "package")
+                             (:file "core" :depends-on ("package"))))
+               (:module "src"
+                :depends-on ("color-sexp")
+                :components ((:file "package")
+                             (:file "protocol" :depends-on ("package"))
+                             (:file "test-result" :depends-on ("protocol"))
+                             (:file "simple-test" :depends-on ("protocol"))
+                             (:file "test-parent" :depends-on ("protocol"))
+                             (:file "test-reporter" :depends-on ("protocol"))
+                             (:file "test-sequencer" :depends-on ("protocol"))
+                             (:file "main" :depends-on ("test-reporter" "test-sequencer")))))
   :in-order-to ((asdf:test-op (asdf:test-op "cl-lustre-tests/tests"))))
 
 (asdf:defsystem #:cl-lustre-tests/tests
