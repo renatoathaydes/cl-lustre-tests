@@ -42,7 +42,8 @@ The test protocol is as follows:
   - eval-test (for each test)
   - report-result (for each test)
   - report-end
-If SIGNAL-CONDITION-ON-ERROR? is not NIL, a TEST-ERROR is signalled on each test failure or error."
+If SIGNAL-CONDITION-ON-ERROR? is NIL, test evaluation proceeds as normal,
+otherwise a TEST-ERROR is signalled on each test failure or error."
   (let ((ctx nil))
     (flet ((on-start-parent (p)
              (setf ctx (report-start stream reporter p ctx)))
@@ -51,10 +52,10 @@ If SIGNAL-CONDITION-ON-ERROR? is not NIL, a TEST-ERROR is signalled on each test
            (on-child (test)
              (eval-test test)
              (let ((result (test-result test)))
-               (when (null result)
-                 (error "Test ~A has no result after being run." test))
+               (unless result
+                 (error "Test ~A has no result after being run." (test-name test)))
+               (report-result stream reporter test ctx)
                (when (and signal-condition-on-error?
                           (not (eql :ok (test-result-status result))))
-                 (error 'test-error :reason (test-result-description result)))
-               (report-result stream reporter test ctx))))
+                 (error 'test-error :reason (test-result-description result))))))
       (dotests test-parent #'on-child #'on-start-parent #'on-end-parent sequencer))))

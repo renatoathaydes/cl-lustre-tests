@@ -10,7 +10,7 @@
   :author      "Renato Athaydes"
   :license     "MIT"
   :version     "0.1.0"
-  :depends-on  ("format-ansi")
+  :depends-on  ("format-ansi" "edit-distance")
   :components ((:module "color-sexp"
                 :pathname "src/color-sexp"
                 :components ((:file "package")
@@ -24,6 +24,7 @@
                              (:file "test-parent" :depends-on ("protocol"))
                              (:file "test-reporter" :depends-on ("protocol"))
                              (:file "test-sequencer" :depends-on ("protocol"))
+                             (:file "expects" :depends-on ("simple-test"))
                              (:file "main" :depends-on ("test-reporter" "test-sequencer")))))
   :in-order-to ((asdf:test-op (asdf:test-op "cl-lustre-tests/tests"))))
 
@@ -36,14 +37,17 @@
   :pathname "tests"
   :components ((:module "basic-test-framework"
                 :components ((:file "package")))
+               (:module "color-sexp-tests"
+                :components ((:file "package")))
                (:module "tests"
                 :depends-on ("basic-test-framework")
                 :components ((:file "package")
                              (:file "define-test-tests" :depends-on ("package"))
+                             (:file "parent-tests" :depends-on ("package"))
                              (:file "end-to-end-tests" :depends-on ("package"))))
                (:module "runner"
                 :depends-on ("tests")
                 :components ((:file "package"))))
   :perform (asdf:test-op (op c)
                          ;; on-error -> :condition | :print | :exit
-                         (uiop:symbol-call :lustre-tests/runner :run-tests :on-error :exit)))
+                         (uiop:symbol-call :lustre-tests/runner :run-tests :on-error :print)))

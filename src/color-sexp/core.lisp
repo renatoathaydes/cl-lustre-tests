@@ -8,6 +8,7 @@
 (defparameter *gray-foreground* 248)
 
 (defun color-sexp (sexp &optional (stream *standard-output*) action)
+  "Colorize S-expression, printing the result to STREAM."
   (case action
     ((:start-list nil) (princ #\( stream))
     (:start-array (princ #\[ stream)))
@@ -31,5 +32,8 @@
     (:start-array (princ #\] stream)))
   nil)
         
-                    
+(defun color-sexp-to-string (sexp)
+  "Colorize S-expression, returning the result as a STRING."
+  (with-output-to-string (s)
+    (color-sexp sexp s)))
         

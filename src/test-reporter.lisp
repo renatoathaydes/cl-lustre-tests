@@ -56,7 +56,7 @@
   (let ((result (test-result test)))
     (case (test-result-status (test-result test))
       (:ok (format stream "~AOK: ~A~%" (car ctx) (test-name test)))
-      (otherwise (format stream "~A~A: ~A ~A~%"
+      (otherwise (format stream "~A~A: ~A~%~A~%"
                          (car ctx)
                          (test-result-status result)
                          (test-name test)
@@ -71,12 +71,12 @@
                                   (:st :bold "~A~%" ,(test-name test)))))
       (:error
        (ansi:format-ansi stream `((:fg :red "~AERROR: " ,(car ctx))
-                                  (:fg :red :st :bold "~A" ,(test-name test))
-                                  (:fg :red " ~A~%" ,(test-result-description result)))))
+                                  (:fg :red :st :bold "~A~%" ,(test-name test))
+                                  (:fg :red "~A~%" ,(test-result-description result)))))
       (otherwise
        (ansi:format-ansi stream `((:fg :yellow "~A~A: " ,(car ctx) ,(test-result-status result))
-                                  (:fg :yellow :st :bold "~A" ,(test-name test))
-                                  (:fg :yellow " ~A~%" ,(test-result-description result))))))))
+                                  (:fg :yellow :st :bold "~A~%" ,(test-name test))
+                                  (:fg :yellow "~A~%" ,(test-result-description result))))))))
 
 (defmethod report-end (stream (reporter counting-test-reporter) parent ctx)
   (when (eq (cdr ctx) parent)

@@ -16,7 +16,20 @@
 (defun run-tests (&key (on-error :condition))
   "Run the tests.
 The ERROR-MODE should be one of :condition | :print | :exit."
-  (format T "Running Lustre Tests' own tests!~%")
+  (format T "==> Running color-sexp module tests!~%~%")
+  (flet ((run-lustre-tests ()
+           (lustre-tests:test :signal-condition-on-error?
+                              (not (eq on-error :print)))))
+    (if (eq :condition on-error)
+        (run-lustre-tests) ;; no handler in this case
+        (handler-case
+            (run-lustre-tests)
+          (error (e)
+            (declare (ignore e))
+            (ecase on-error
+              (:print nil) ;; the test-reporter already prints the error
+              (:exit (uiop:quit 1)))))))
+  (format T "==> Running Lustre Tests' own tests (using basic-test-framework)!~%~%")
   (let ((error-count 0)
         (success-count 0))
     (dolist (test *tests*) (run-test test))
@@ -30,4 +43,3 @@ The ERROR-MODE should be one of :condition | :print | :exit."
             (:print (print-results))
             (:exit (print-results)
              (uiop:quit 1)))))))
-
