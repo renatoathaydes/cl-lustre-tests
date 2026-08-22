@@ -6,7 +6,6 @@
    (#:lt #:lustre-tests))
   (:export #:*tests*
            #:define-lustre-test
-           #:assert-strings-equal
            #:assert-t
            #:assert-nil
            #:with-local-root))
@@ -19,17 +18,6 @@
   `(progn
      (defun ,name () ,@body)
      (pushnew ',name *tests*)))
-
-;; Hard to test ANSI output without an assertion to help with that.
-
-(defun assert-strings-equal (test-name actual expected)
-  (unless (string= expected actual)
-    (error (with-output-to-string (s)
-             (format s "~A FAILED~%" test-name)
-             (format s "Expected: ~S~%" expected)
-             (format s "Actual:   ~S~%" actual)
-             (format s "Difference at position ~D:~%"
-                     (or (mismatch expected actual) (length expected)))))))
 
 (defmacro with-local-root ((root) &body body)
   `(let* ((lt::*root-test-parent*

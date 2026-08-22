@@ -7,9 +7,7 @@
     (let ((result
             (with-output-to-string (stream)
               (lt:test :stream stream :test-parent root))))
-      (assert-strings-equal
-       'report-successful-tests-correctly-by-default
-       result
+      (lt:expect-seq
        (ansi:format-ansi
         nil
         `(("== LUSTRE TESTS ==~%")
@@ -25,4 +23,5 @@
           ("")
           (:fg :green "Success: 2, ")
           (:fg :yellow "Failures: 0, ")
-          (:fg :red "Errors: 0~%")))))))
+          (:fg :red "Errors: 0~%")))
+       result))))
