@@ -20,6 +20,18 @@ by replacing any existing tests with the same name."
         (test-children parent))
   (push test (test-children parent)))
 
+(defun remove-child (test parent)
+  "Remove a TEST from a PARENT.
+Returns T if removed, NIL otherwise."
+  (and test
+       (let ((removed? nil))
+         (setf (test-children parent)
+               (remove-if (lambda (item)
+                            (when (tests-equalp test item)
+                              (setf removed? T)))
+                          (test-children parent)))
+         removed?)))
+
 (defun find-test (name parent &optional parent-names)
   "Find a test by NAME under a root PARENT, using PARENT-NAMES to find intermediate test parents."
   (if (null parent-names)
@@ -38,6 +50,16 @@ by replacing any existing tests with the same name."
                           (make-instance 'test-parent :name (car parent-names)))))
         (unless existing-parent (add-child new-parent parent))
         (add-test test new-parent (cdr parent-names)))))
+
+(defun remove-test (name parent &optional parent-names)
+  "Remove a test with NAME from PARENT, using PARENT-NAMES to find intermediate test parents.
+Returns T if the test was removed, NIL otherwise."
+  (if (null parent-names)
+      (remove-child (find-child name parent) parent)
+      (let ((actual-parent (find-test (car (last parent-names))
+                                      parent (butlast parent-names))))
+        (when actual-parent
+          (remove-child (find-child name actual-parent) actual-parent)))))
 
 (defun print-test-tree (parent &optional (stream *standard-output*))
   "Print a test tree."

@@ -5,6 +5,8 @@
   (:export #:*tests*
            #:define-lustre-test
            #:assert-strings-equal
+           #:assert-t
+           #:assert-nil
            #:with-local-root))
 
 (in-package #:lustre-tests/basic-framework)
@@ -33,3 +35,9 @@
           (,root
             lustre-tests::*root-test-parent*))
      ,@body))
+
+(defmacro assert-t (&body body)
+  `(assert (eq T (progn ,@body))))
+
+(defmacro assert-nil (&body body)
+  `(assert (null (progn ,@body))))

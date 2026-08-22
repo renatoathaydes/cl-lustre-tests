@@ -11,6 +11,7 @@
            #:test-parent
            #:add-test
            #:find-test
+           #:remove-test
            #:print-test-tree
            #:count-tests
            #:dotests
