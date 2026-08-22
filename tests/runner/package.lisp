@@ -1,4 +1,9 @@
-(in-package #:lustre-tests/tests)
+(defpackage lustre-tests/runner
+  (:documentation "basic-framework test runner.")
+  (:use #:cl #:lustre-tests/basic-framework)
+  (:export #:run-tests))
+
+(in-package #:lustre-tests/runner)
 
 (defmacro run-test (name)
   `(handler-case (progn
@@ -25,3 +30,4 @@ The ERROR-MODE should be one of :condition | :print | :exit."
             (:print (print-results))
             (:exit (print-results)
              (uiop:quit 1)))))))
+

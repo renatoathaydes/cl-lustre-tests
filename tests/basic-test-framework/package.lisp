@@ -1,8 +1,13 @@
-(in-package #:lustre-tests/tests)
+(defpackage lustre-tests/basic-framework
+  (:documentation "Tiniest test framework in the world.
+    Tests are just functions whose names are pushed into *tests*.")
+  (:use #:cl)
+  (:export #:*tests*
+           #:define-lustre-test
+           #:assert-strings-equal
+           #:with-local-root))
 
-;;;; Tiniest test framework in the world ;;;;
-
-;; Tests are just functions whose names are pushed into *tests*.
+(in-package #:lustre-tests/basic-framework)
 
 (defparameter *tests* nil)
 
