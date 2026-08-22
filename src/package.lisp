@@ -10,8 +10,7 @@
            #:test-sequencer
            #:test-parent
            #:add-test
-           #:add-child
-           #:find-child
+           #:find-test
            #:print-test-tree
            #:count-tests
            #:dotests
@@ -28,8 +27,11 @@
            #:simple-test-reporter
            #:ansi-test-reporter
            #:test-error
+           #:expect-seq
            ;; test-result slots
            #:test-result-status
+           ;; simple-test-result slots
+           #:test-result-description
            ;; test-parent slots
            #:test-children
            ;; test-object slots

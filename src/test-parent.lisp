@@ -5,6 +5,7 @@
        (eq (test-name t1) (test-name t2))))
 
 (defun find-child (name parent)
+  "Find a TEST by NAME under a PARENT."
   (find-if (lambda (child)
              (eq name (test-name child)))
            (test-children parent)))
@@ -19,12 +20,23 @@ by replacing any existing tests with the same name."
         (test-children parent))
   (push test (test-children parent)))
 
+(defun find-test (name parent &optional parent-names)
+  "Find a test by NAME under a root PARENT, using PARENT-NAMES to find intermediate test parents."
+  (if (null parent-names)
+      (find-child name parent)
+      (let ((existing-parent (find-child (car parent-names) parent)))
+        (when existing-parent
+          (find-test name existing-parent (cdr parent-names))))))
+
 (defun add-test (test parent &optional parent-names)
   "Add a TEST to a PARENT, using PARENT-NAMES to make or find intermediate test parents."
   (if (null parent-names)
       (add-child test parent)
-      (let ((new-parent (make-instance 'test-parent :name (car parent-names))))
-        (add-child new-parent parent)
+      (let* ((existing-parent (find-child (car parent-names) parent))
+             (new-parent (or
+                          existing-parent
+                          (make-instance 'test-parent :name (car parent-names)))))
+        (unless existing-parent (add-child new-parent parent))
         (add-test test new-parent (cdr parent-names)))))
 
 (defun print-test-tree (parent &optional (stream *standard-output*))
@@ -43,7 +55,7 @@ by replacing any existing tests with the same name."
 (defun count-tests (parent)
   "Count how many tests are included in the TEST-PARENT.
 Recursively counts children that are also TEST-PARENT themselves.
-Does not include other TEST-PARENTs in the result."
+Does not include any TEST-PARENT instances in the result."
   (let ((result 0))
     (flet ((on-test (test)
              (declare (ignore test))
