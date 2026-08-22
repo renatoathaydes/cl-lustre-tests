@@ -2,6 +2,8 @@
   (:documentation "Tiniest test framework in the world.
     Tests are just functions whose names are pushed into *tests*.")
   (:use #:cl)
+  (:local-nicknames
+   (#:lt #:lustre-tests))
   (:export #:*tests*
            #:define-lustre-test
            #:assert-strings-equal
@@ -23,17 +25,17 @@
 (defun assert-strings-equal (test-name actual expected)
   (unless (string= expected actual)
     (error (with-output-to-string (s)
-      (format s "~A FAILED~%" test-name)
-      (format s "Expected: ~S~%" expected)
-      (format s "Actual:   ~S~%" actual)
-      (format s "Difference at position ~D:~%"
-              (or (mismatch expected actual) (length expected)))))))
+             (format s "~A FAILED~%" test-name)
+             (format s "Expected: ~S~%" expected)
+             (format s "Actual:   ~S~%" actual)
+             (format s "Difference at position ~D:~%"
+                     (or (mismatch expected actual) (length expected)))))))
 
 (defmacro with-local-root ((root) &body body)
-  `(let* ((lustre-tests::*root-test-parent*
-            (make-instance 'lustre-tests:test-parent :name 'lustre-tests::ROOT))
+  `(let* ((lt::*root-test-parent*
+            (make-instance 'lt:test-parent :name 'lt::ROOT))
           (,root
-            lustre-tests::*root-test-parent*))
+            lt::*root-test-parent*))
      ,@body))
 
 (defmacro assert-t (&body body)

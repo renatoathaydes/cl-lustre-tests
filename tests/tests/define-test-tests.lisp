@@ -2,27 +2,27 @@
 
 (define-lustre-test define-test-defines-test-no-parents
   (with-local-root (root)
-    (lustre-tests:define-test my-test () T)
-    (assert (= 1 (length (lustre-tests:test-children root))))))
+    (lt:define-test my-test () T)
+    (assert (= 1 (length (lt:test-children root))))))
 
 (define-lustre-test define-test-defines-test-under-parent
   (with-local-root (root)
-    (lustre-tests:define-test my-test (local-tests) T)
-    (let ((parent (lustre-tests:find-test 'local-tests root)))
-      (assert (typep parent 'lustre-tests:test-parent))
-      (assert (= 1 (length (lustre-tests:test-children parent))))
-      (assert (= 1 (length (lustre-tests:test-children root)))))))
+    (lt:define-test my-test (local-tests) T)
+    (let ((parent (lt:find-test 'local-tests root)))
+      (assert (typep parent 'lt:test-parent))
+      (assert (= 1 (length (lt:test-children parent))))
+      (assert (= 1 (length (lt:test-children root)))))))
 
 (define-lustre-test define-test-can-redefine-test
   (with-local-root (root)
-    (lustre-tests:define-test my-test (local-tests) :FIRST)
-    (lustre-tests:define-test my-test (local-tests) :SECOND)
-    (let ((parent (lustre-tests:find-test 'local-tests root)))
-      (assert (typep parent 'lustre-tests:test-parent))
-      (assert (= 1 (length (lustre-tests:test-children parent))))
-      (assert (= 1 (length (lustre-tests:test-children root))))
+    (lt:define-test my-test (local-tests) :FIRST)
+    (lt:define-test my-test (local-tests) :SECOND)
+    (let ((parent (lt:find-test 'local-tests root)))
+      (assert (typep parent 'lt:test-parent))
+      (assert (= 1 (length (lt:test-children parent))))
+      (assert (= 1 (length (lt:test-children root))))
       ;; the latest test defined wins
       (assert (eql (funcall
-                    (lustre-tests::test-fun
-                     (lustre-tests:find-test 'my-test parent)))
+                    (lt::test-fun
+                     (lt:find-test 'my-test parent)))
                    :SECOND)))))

@@ -1,12 +1,13 @@
 (defpackage lustre-tests/color-sexp/tests
   (:documentation "lustre-tests/color-sexp tests.")
-  (:use #:cl
-        #:lustre-tests
-        #:lustre-tests/color-sexp))
+  (:use #:cl)
+  (:local-nicknames
+   (#:lt #:lustre-tests)
+   (#:cs #:lustre-tests/color-sexp)))
 
 (in-package #:lustre-tests/color-sexp/tests)
 
-(define-test colors-symbol (color-sexp)
-  (expect-seq
+(lt:define-test colors-symbol (color-sexp)
+  (lt:expect-seq
    (ansi:format-ansi nil '("(" (:fg :cyan "foo") ")"))
-   (color-sexp-to-string '(foo))))
+   (cs:color-sexp-to-string '(foo))))
