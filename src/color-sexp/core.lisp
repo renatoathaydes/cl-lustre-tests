@@ -28,7 +28,7 @@
                (ansi:format-ansi stream `((:fg ,color "~S" ,term)))))
         do (setf first? nil))
   (case action
-    (:start-list (princ #\) stream))
+    ((:start-list nil) (princ #\) stream))
     (:start-array (princ #\] stream)))
   nil)
         
