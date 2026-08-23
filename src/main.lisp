@@ -59,3 +59,15 @@ otherwise a TEST-ERROR is signalled on each test failure or error."
                           (not (eql :ok (test-result-status result))))
                  (error 'test-error :reason (test-result-description result))))))
       (dotests test-parent #'on-child #'on-start-parent #'on-end-parent sequencer))))
+
+(defun test-simple (&key
+                      (test-parent (init-root))
+                      (stream *standard-output*)
+                      (sequencer (make-instance 'simple-test-sequencer))
+                      (signal-condition-on-error? nil))
+  "Call TEST with the REPORTER set to an instance of SIMPLE-TEST-REPORTER."
+  (test :test-parent test-parent
+        :stream stream
+        :sequencer sequencer
+        :signal-condition-on-error? signal-condition-on-error?
+        :reporter (make-instance 'simple-test-reporter)))

@@ -2,6 +2,7 @@
   (:use #:cl)
   (:documentation "The cl-lustre-tests package.")
   (:export #:test
+           #:test-simple
            #:define-test
            #:make-test-name
            #:test-object
