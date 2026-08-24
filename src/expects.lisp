@@ -10,45 +10,55 @@ when EXPECT-SEQ fails, starting from the first element mismatch.")
 (defun subvec (seq start end)
   (coerce (subseq seq start end) 'vector))
 
-(defun fill-shorter (s1 s2)
-  (let ((l1 (file-position s1))
-        (l2 (file-position s2)))
-    (cond
-      ((= l1 l2) nil)
-      ((> l1 l2) (dotimes (n (- l1 l2)) (princ #\SPACE s2)))
-      (T (dotimes (n (- l2 l1)) (princ #\SPACE s1))))))
-
-(defun print-diff (stream expected actual matches prefix expected-suffix actual-suffix diff-index)
-  (let ((index 0)
-        (diff-print-index 0)
-        (es (make-string-output-stream))
-        (as (make-string-output-stream)))
-    ;; loop only to the shorter sequence length
-    (loop for e across expected
-          for a across actual
-          do (progn
-               (when (= index diff-index)
-                 (setf diff-print-index (file-position es)))
-               (format es "~A " e)
-               (format as "~A " a)
-               (fill-shorter es as)
-               (incf index)))
-    ;; now loop to the rest of the longer sequence
-    (multiple-value-bind (seq st)
-        (cond
-          ((> (length actual) (length expected))
-           (values actual as))
-          ((< (length actual) (length expected))
-           (values expected es))
-          (T (values nil nil)))
-      (loop for i from index below (length seq)
-            do (when (= i diff-index)
-                 (setf diff-print-index (file-position st)))
-            do (format st "~A " (aref seq i))))
-    (format stream "Expected: ~A~A~A~%" prefix (get-output-stream-string es) expected-suffix)
-    (format stream "Actual:   ~A~A~A~%" prefix (get-output-stream-string as) actual-suffix)
-    (format stream "          ~v@t~a~%" (+ (length prefix) diff-print-index) "^")
-    (format stream "Changes:  ~A" matches)))
+(defun print-diff (stream expected actual matches prefix expected-suffix actual-suffix)
+  (let ((expected-len (length expected))
+        (actual-len (length actual))
+        (es (make-string-output-stream)) ;; expected stream
+        (as (make-string-output-stream)) ;; actual stream
+        (ms (make-string-output-stream)) ;; matches stream
+        (ei 0) ;; expected index
+        (ai 0)) ;; actual index
+    (labels ((print-e (e)
+               (format es "~A~A" e (if (= (incf ei) expected-len) "" " ")))
+             (print-a (a)
+               (format as "~A~A" a (if (= (incf ai) actual-len) "" " ")))
+             (print-e-and-a (e a)
+               (print-e e)
+               (print-a a))
+             (spaces (len)
+               (if (> len 1)
+                   (make-string len :initial-element #\SPACE)
+                   ""))
+             (fill-shorter (s1 s2 s3)
+               (let ((l1 (if s1 (file-position s1) 0))
+                     (l2 (if s2 (file-position s2) 0))
+                     (l3 (file-position s3)))
+                 (let ((len (max l1 l2 l3)))
+                   (when s1 (princ (spaces (- len l1)) s1))
+                   (when s2 (princ (spaces (- len l2)) s2))
+                   (princ (spaces (- len l3)) s3)))))
+      (loop for i from 0 below (length matches)
+            for e = (if (< ei expected-len) (aref expected ei) #\SPACE)
+            for a = (if (< ai actual-len) (aref actual ai) #\SPACE)
+            for m = (aref matches i)
+            do (ecase (car m)
+                 (:match (print-e-and-a e a))
+                 (:substitution
+                  (print-e-and-a e a)
+                  (princ "~" ms))
+                 (:insertion
+                  (print-a a)
+                  (princ "+" ms))
+                 (:deletion
+                  (print-e e)
+                  (princ "-" ms)))
+            do (fill-shorter
+                (when (< ei expected-len) es)
+                (when (< ai actual-len) as)
+                ms))
+      (format stream "Expected: ~A~A~A~%" prefix (get-output-stream-string es) expected-suffix)
+      (format stream "Actual:   ~A~A~A~%" prefix (get-output-stream-string as) actual-suffix)
+      (format stream "          ~A~A" (spaces (length prefix)) (get-output-stream-string ms)))))
 
 (defun expect-seq (expected actual &optional (test 'equal))
   "Returns NIL is the sequence are equal, or a SIMPLE-TEST-RESULT
@@ -83,9 +93,8 @@ with a failure description otherwise."
                           (print-diff s
                                       (subvec expected first-shown-index expected-last-index)
                                       (subvec actual first-shown-index actual-last-index)
-                                      (subvec matches first-diff-index last-diff-index)
+                                      (subvec matches first-shown-index last-diff-index)
                                       prefix
                                       expected-suffix
-                                      actual-suffix
-                                      (- first-diff-index first-shown-index)))))
+                                      actual-suffix))))
         T)))
