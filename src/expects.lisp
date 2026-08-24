@@ -79,7 +79,7 @@ with a failure description otherwise."
                                   distance
                                   first-diff-index
                                   first-shown-index
-                                  max-shown-index)
+                                  (max expected-last-index actual-last-index))
                           (print-diff s
                                       (subvec expected first-shown-index expected-last-index)
                                       (subvec actual first-shown-index actual-last-index)
