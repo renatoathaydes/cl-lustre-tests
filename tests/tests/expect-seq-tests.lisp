@@ -49,7 +49,7 @@ Actual:   a
      "Levenshtein distance: 1, first diff at 3, showing from 1 to 5
 Expected: ...b c d e
 Actual:   ...b c f e
-                 ~")))
+                 ~ ")))
 
 (define-lustre-test expect-seq-not-equal-same-length-too-long-to-show-end
   (let ((lustre-tests::*max-diff-items-to-display* 4)
@@ -69,7 +69,7 @@ Actual:   a x c d...
      "Levenshtein distance: 1, first diff at 4, showing from 2 to 6
 Expected: ...c d e f...
 Actual:   ...c d x f...
-                 ~")))
+                 ~ ")))
 
 (define-lustre-test expect-seq-not-equal-deletions-and-substitutions
   (let ((lustre-tests::*max-diff-items-to-display* 5)
@@ -79,7 +79,19 @@ Actual:   ...c d x f...
      "Levenshtein distance: 2, first diff at 4, showing from 2 to 7
 Expected: ...c d e f g...
 Actual:   ...c d   f x 
-                 -   ~")))
+                 -   ~ ")))
+
+(define-lustre-test expect-seq-not-equal-includes-invisible-characters
+  (let ((lustre-tests::*max-diff-items-to-display* 6)
+        (lustre-tests::*max-displayed-items-before-diff* 3))
+    (flet ((conc (s1 char s2)
+             (concatenate 'string s1 (string char) s2)))
+      (assert-failed-description
+       (lustre-tests:expect-seq (conc "abcd" #\ESC "efgh") (conc "abcd" #\ESC "fxhi"))
+       "Levenshtein distance: 3, first diff at 5, showing from 2 to 8
+Expected: ...c d \\x1B e f g...
+Actual:   ...c d \\x1B   f x ...
+                      -   ~ "))))
 
 ;;; SAME TESTS REPEATED FOR INTEGER SEQUENCES WITH MEMBERS HAVING MORE THAN ONE DIGIT
 
