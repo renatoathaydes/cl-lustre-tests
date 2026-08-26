@@ -1,6 +1,8 @@
 (defpackage #:lustre-tests
   (:use #:cl)
   (:documentation "The cl-lustre-tests package.")
+  (:import-from #:trivial-gray-streams
+                #:fundamental-character-output-stream)
   (:export #:test
            #:test-simple
            #:define-test

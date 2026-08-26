@@ -7,74 +7,113 @@ when EXPECT-SEQ fails, starting from the first element mismatch.")
 (defparameter *max-displayed-items-before-diff* 20
   "The maximum number of items in a sequence to show before the diff starts")
 
+(defclass expects-output-stream
+    (trivial-gray-streams:fundamental-character-output-stream)
+  ((delegate :initform (make-string-output-stream))
+   (items :initarg :items :reader stream-items)
+   (index :initform 0 :accessor item-index)
+   (visible-chars :initform 0 :reader visible-chars)))
+
+(defun stream-done (stream)
+  (with-slots (items index) stream
+    (>= index (length items))))
+
+(defun next-item (stream)
+  (with-slots (items index) stream
+    (when (< index (length items))
+      (let ((result (aref items index)))
+        (incf index)
+        result))))
+
+(defun sync-visible-positions (s1 s2 s3)
+  (flet ((fill-spaces (len stream)
+           (unless (stream-done stream)
+             (loop repeat len do (write-char #\SPACE stream)))))
+    (let* ((c1 (visible-chars s1))
+           (c2 (visible-chars s2))
+           (c3 (visible-chars s3))
+           (max (max c1 c2 c3)))
+      (fill-spaces (- max c1) s1)
+      (fill-spaces (- max c2) s2)
+      (fill-spaces (- max c3) s3))))
+
+(defmacro with-color (color (&rest streams) &body body)
+  (flet ((printing (stream bg-color)
+           `(with-slots (delegate) ,stream
+              (ansi::print-ansi :bg ,bg-color delegate))))
+    (let ((calls (mapcar (lambda (s) (printing s color)) streams))
+          (resets (mapcar (lambda (s) (printing s :reset)) streams)))
+      `(progn ,@calls ,@body ,@resets))))
+
+(defmethod trivial-gray-streams:stream-write-char
+    ((stream expects-output-stream) char)
+  (with-slots (delegate visible-chars) stream
+    (let ((code (char-code char)))
+      (incf visible-chars
+            (cond
+              ;; ESC character (27), control characters (0-31, 127)
+              ((or (= code 27) (< code 32) (= code 127))
+               (format delegate "\\x~2,'0X" code)
+               4)
+              (T
+               (write-char char delegate)
+               1))))
+    char))
+
+(defmethod trivial-gray-streams:stream-line-column
+    ((stream expects-output-stream))
+  (with-slots (delegate) stream
+    (stream-line-column delegate)))
+
 (defun subvec (seq start end)
   (coerce (subseq seq start end) 'vector))
 
-(defun print-diff (stream expected actual matches prefix expected-suffix actual-suffix)
-  (let ((expected-len (length expected))
-        (actual-len (length actual))
-        (strings? (and
+(defun print-diff (stream expected actual matches prefix
+                   expected-suffix actual-suffix ansi?)
+  (let ((strings? (and
                    (typep expected '(vector character))
                    (typep actual '(vector character))))
-        (es (make-string-output-stream)) ;; expected stream
-        (as (make-string-output-stream)) ;; actual stream
-        (ms (make-string-output-stream)) ;; matches stream
-        (ei 0) ;; expected index
-        (ai 0)) ;; actual index
-    (labels ((print-char (char stream)
-               (let ((code (char-code char)))
-                 (if
-                  ;; ESC character (27), control characters (0-31, 127)
-                  (or (= code 27) (< code 32) (= code 127))
-                  (format stream "\\x~2,'0X" code)
-                  (write-char char stream))))
-             (print-e (e)
-               (if strings? (print-char e es) (format es "~A" e))
-               (unless (= (incf ei) expected-len) (write-char #\SPACE es)))
-             (print-a (a)
-               (if strings? (print-char a as) (format as "~A" a))
-               (unless (= (incf ai) actual-len) (write-char #\SPACE as)))
-             (print-e-and-a (e a)
-               (print-e e)
-               (print-a a))
-             (spaces (stream len)
-               (if (> len 0)
-                   (if stream
-                       (loop repeat len do (write-char #\SPACE stream))
-                       (make-string len :initial-element #\SPACE))
-                   ""))
-             (fill-shorter (s1 s2 s3)
-               (let ((l1 (if s1 (file-position s1) 0))
-                     (l2 (if s2 (file-position s2) 0))
-                     (l3 (file-position s3)))
-                 (let ((len (max l1 l2 l3)))
-                   (when s1 (spaces s1 (- len l1)))
-                   (when s2 (spaces s2 (- len l2)))
-                   (spaces s3 (- len l3))))))
-      (loop for i from 0 below (length matches)
-            for e = (if (< ei expected-len) (aref expected ei) #\SPACE)
-            for a = (if (< ai actual-len) (aref actual ai) #\SPACE)
-            for m = (aref matches i)
+        (es (make-instance 'expects-output-stream
+                           :items expected))
+        (as (make-instance 'expects-output-stream
+                           :items actual))
+        (ms (make-instance 'expects-output-stream
+                           :items matches)))
+    (labels ((print-item (item stream)
+               (if strings?
+                   (write-char item stream)
+                   (format stream "~A" item))
+               (unless (stream-done stream)
+                 (write-char #\SPACE stream))))
+      (loop for e = (next-item es)
+            for a = (next-item as)
+            for m = (next-item ms)
+            while m
             do (ecase (car m)
-                 (:match (print-e-and-a e a))
+                 (:match (print-item e es) (print-item a as))
                  (:substitution
-                  (print-e-and-a e a)
-                  (princ "~" ms))
+                  (with-color :yellow (es as)
+                    (print-item e es) (print-item a as))
+                  (unless ansi? (princ "~" ms)))
                  (:insertion
-                  (print-a a)
-                  (princ "+" ms))
+                  (with-color :yellow (as) (print-item a as))
+                  (unless ansi? (princ "+" ms)))
                  (:deletion
-                  (print-e e)
-                  (princ "-" ms)))
-               ;; the indexes have been incremented here, so we check them again
-            do (fill-shorter (when (< ei expected-len) es) (when (< ai actual-len) as) ms))
+                  (with-color :red (es) (print-item e es))
+                  (unless ansi? (princ "-" ms))))
+            do (sync-visible-positions es as ms))
       (format stream "Expected: ~A~A~A~%" prefix (get-output-stream-string es) expected-suffix)
       (format stream "Actual:   ~A~A~A~%" prefix (get-output-stream-string as) actual-suffix)
-      (format stream "          ~A~A" (spaces nil (length prefix)) (get-output-stream-string ms)))))
+      (unless ansi?
+        (format stream "          ~A~A"
+                (make-string (length prefix) :initial-element #\SPACE)
+                (get-output-stream-string ms))))))
 
-(defun expect-seq (expected actual &optional (test 'equal))
+(defun expect-seq (expected actual
+                   &optional (test 'equal) ansi?)
   "Returns NIL is the sequence are equal, or a SIMPLE-TEST-RESULT
-with a failure description otherwise."
+with a failure description otherwise.
+If ANSI? is not NIL, then the TEST-DESCRIPTION diff will be color-encoded."
   (multiple-value-bind (matches distance)
       (edit-distance:diff expected actual :test test)
     (if (> distance 0)
@@ -108,5 +147,6 @@ with a failure description otherwise."
                                       (subvec matches first-shown-index last-diff-index)
                                       prefix
                                       expected-suffix
-                                      actual-suffix))))
+                                      actual-suffix
+                                      ansi?))))
         T)))

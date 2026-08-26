@@ -1,3 +1,5 @@
 edit-distance, ghcr.io/ocicl/edit-distance@sha256:ea61da56246ea4bdd9c003d5f408eb2a844506d5b2919a9e5e97e99b790a4295, cl-editdistance-20240503-89c48c1/edit-distance.asd
 edit-distance-test, ghcr.io/ocicl/edit-distance@sha256:ea61da56246ea4bdd9c003d5f408eb2a844506d5b2919a9e5e97e99b790a4295, cl-editdistance-20240503-89c48c1/edit-distance-test.asd
 format-ansi, ghcr.io/ocicl/format-ansi@sha256:4a4e195c1795ed0495fb2cd0aaa085b0d332b6609dc1650e5e69bc88dcc4f489, format-ansi-20260814-8c27fdd/format-ansi.asd
+trivial-gray-streams, ghcr.io/ocicl/trivial-gray-streams@sha256:9d702556e5973fd18e67642b18bd5a2f901972ef7d5b134615e2f5fd77396bb9, trivial-gray-streams-20260818-257d73e/trivial-gray-streams.asd
+trivial-gray-streams-test, ghcr.io/ocicl/trivial-gray-streams@sha256:9d702556e5973fd18e67642b18bd5a2f901972ef7d5b134615e2f5fd77396bb9, trivial-gray-streams-20260818-257d73e/trivial-gray-streams-test.asd
