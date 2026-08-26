@@ -11,18 +11,24 @@ the test runs."))
 (defmethod eval-test ((test simple-test))
   "Evaluate this test.
    Returns the TEST-INSTANCE with its result having been set."
-  (let* ((result (handler-case
+  (let* ((start-time (get-internal-real-time))
+         (result (handler-case
                      (funcall (test-fun test))
-                   (error (e) (make-test-result :error e))))
+                   (error (e) (make-instance 'simple-test-result
+                                             :status :error
+                                             :duration (- (get-internal-real-time) start-time)
+                                             :description e))))
          (t-result (typecase result
                      (test-result result)
                      (T ;; consider the result a BOOLEAN meaning OK
-                      (make-test-result
-                       (if result :ok :fail)
-                       (unless result
-                         (with-output-to-string (s)
-                           (lustre-tests/color-sexp:color-sexp
-                            (test-body test) s)
-                           (format s " => ~A"  result))))))))
+                      (make-instance
+                       'simple-test-result
+                       :status (if result :ok :failed)
+                       :duration (- (get-internal-real-time) start-time)
+                       :description (unless result
+                                      (with-output-to-string (s)
+                                        (lustre-tests/color-sexp:color-sexp
+                                         (test-body test) s)
+                                        (format s " => ~A"  result))))))))
     (setf (test-result test) t-result)
     test))

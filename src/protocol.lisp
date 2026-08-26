@@ -1,9 +1,12 @@
 (in-package #:lustre-tests)
 
 (defclass test-result ()
-  ((status :reader test-result-status :initarg :status :initform :ok))
+  ((status :reader test-result-status :initarg :status :initform :ok)
+   (duration :reader test-duration :initarg :duration :initform 0))
   (:documentation "The result of running a test.
-It should be pretty-printable so it can be shown in test reports."))
+It should be pretty-printable so it can be shown in test reports.
+The STATUS should be :OK, :FAILED or :ERROR.
+The DURATION should be in REAL-TIME units."))
 
 (defclass test-parent ()
   ((name :reader test-name :initarg :name

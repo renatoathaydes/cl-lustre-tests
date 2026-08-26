@@ -53,9 +53,10 @@
 
 (defmethod report-result (stream (reporter simple-test-reporter) (test test-object) ctx)
   (call-next-method)
-  (let ((result (test-result test)))
-    (case (test-result-status (test-result test))
-      (:ok (format stream "~AOK: ~A~%" (car ctx) (test-name test)))
+  (let* ((result (test-result test))
+         (duration (test-duration result)))
+    (case (test-result-status result)
+      (:ok (format stream "~AOK: ~A (~A)~%" (car ctx) (test-name test) duration))
       (otherwise (format stream "~A~A: ~A~%~A~%"
                          (car ctx)
                          (test-result-status result)
@@ -64,18 +65,19 @@
 
 (defmethod report-result (stream (reporter ansi-test-reporter) (test test-object) ctx)
   (call-next-method)
-  (let ((result (test-result test)))
+  (let* ((result (test-result test))
+         (duration (test-duration result)))
     (case (test-result-status result)
       (:ok
        (ansi:format-ansi stream `((:fg :green "~AOK: " ,(car ctx))
-                                  (:st :bold "~A~%" ,(test-name test)))))
+                                  (:st :bold "~A (~A)~%" ,(test-name test) ,duration))))
       (:error
        (ansi:format-ansi stream `((:fg :red "~AERROR: " ,(car ctx))
-                                  (:fg :red :st :bold "~A~%" ,(test-name test))
+                                  (:fg :red :st :bold "~A (~A)~%" ,(test-name test) ,duration)
                                   (:fg :red "~A~%" ,(test-result-description result)))))
       (otherwise
        (ansi:format-ansi stream `((:fg :yellow "~A~A: " ,(car ctx) ,(test-result-status result))
-                                  (:fg :yellow :st :bold "~A~%" ,(test-name test))
+                                  (:fg :yellow :st :bold "~A (~A)~%" ,(test-name test) ,duration)
                                   (:fg :yellow "~A~%" ,(test-result-description result))))))))
 
 (defmethod report-end (stream (reporter counting-test-reporter) parent ctx)

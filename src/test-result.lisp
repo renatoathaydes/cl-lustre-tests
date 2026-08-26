@@ -5,11 +5,6 @@
   (:documentation "The result of running a test.
 It should be pretty-printable so it can be shown in test reports."))
 
-(defun make-test-result (status &optional description)
-  (make-instance 'simple-test-result
-                 :status status
-                 :description description))
-
 (defmethod print-object ((result simple-test-result) stream)
   (let ((full-format "#<TEST-RESULT ~A, ~A>")
         (short-format "#<TEST-RESULT ~A>"))
