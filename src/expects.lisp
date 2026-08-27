@@ -88,7 +88,7 @@ when EXPECT-SEQ fails, starting from the first element mismatch.")
                (if strings?
                    (write-char item stream)
                    (format stream "~A" item))
-               (unless (stream-done stream)
+               (unless (or ansi? (stream-done stream))
                  (write-char #\SPACE stream))))
       (loop for e = (next-item es)
             for a = (next-item as)
