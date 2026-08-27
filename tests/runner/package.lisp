@@ -8,18 +8,21 @@
 (defmacro run-test (name)
   `(handler-case (progn
                     (funcall ,name)
-                    (incf success-count))
+                    :ok)
      (error (e)
-       (incf error-count)
-       (format T "ERROR: ~A~%  ~A~%" (symbol-name ,name) e))))
+       (format T "ERROR: ~A~%  ~A~%"
+               (symbol-name ,name)
+               e)
+       :failed)))
 
 (defun run-tests (&key (on-error :condition))
   "Run the tests.
 The ERROR-MODE should be one of :condition | :print | :exit."
   (format T "==> Running color-sexp module tests!~%~%")
   (flet ((run-lustre-tests ()
-           (lustre-tests:test :signal-condition-on-error?
-                              (not (eq on-error :print)))))
+           (let ((lustre-tests:*show-diff-with-ansi-colors* T))
+             (lustre-tests:test :signal-condition-on-error?
+                                (not (eq on-error :print))))))
     (if (eq :condition on-error)
         (run-lustre-tests) ;; no handler in this case
         (handler-case
@@ -32,7 +35,11 @@ The ERROR-MODE should be one of :condition | :print | :exit."
   (format T "==> Running Lustre Tests' own tests (using basic-test-framework)!~%~%")
   (let ((error-count 0)
         (success-count 0))
-    (dolist (test *tests*) (run-test test))
+    (dolist (test *tests*)
+      (let ((result (run-test test)))
+        (ecase result
+          (:ok (incf success-count))
+          (:failed (incf error-count)))))
     (if (zerop error-count)
         (ansi:format-ansi T `((:fg :green "OK - all ~A test(s) passed!~%" ,success-count)))
         (flet ((print-results ()
