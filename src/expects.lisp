@@ -7,9 +7,12 @@ when EXPECT-SEQ fails, starting from the first element mismatch.")
 (defparameter *max-displayed-items-before-diff* 20
   "The maximum number of items in a sequence to show before the diff starts")
 
+(defparameter *show-diff-with-ansi-colors* nil
+  "Whether to show diffs using ANSI colors.")
+
 (defclass expects-output-stream
     (trivial-gray-streams:fundamental-character-output-stream)
-  ((delegate :initform (make-string-output-stream))
+  ((delegate :reader delegate-stream :initform (make-string-output-stream))
    (items :initarg :items :reader stream-items)
    (index :initform 0 :accessor item-index)
    (visible-chars :initform 0 :reader visible-chars)))
@@ -39,8 +42,9 @@ when EXPECT-SEQ fails, starting from the first element mismatch.")
 
 (defmacro with-color (color (&rest streams) &body body)
   (flet ((printing (stream bg-color)
-           `(with-slots (delegate) ,stream
-              (ansi::print-ansi :bg ,bg-color delegate))))
+           `(when ,bg-color
+              (with-slots (delegate) ,stream
+                (ansi::print-ansi :bg ,bg-color delegate)))))
     (let ((calls (mapcar (lambda (s) (printing s color)) streams))
           (resets (mapcar (lambda (s) (printing s :reset)) streams)))
       `(progn ,@calls ,@body ,@resets))))
@@ -63,16 +67,17 @@ when EXPECT-SEQ fails, starting from the first element mismatch.")
 (defmethod trivial-gray-streams:stream-line-column
     ((stream expects-output-stream))
   (with-slots (delegate) stream
-    (stream-line-column delegate)))
+    (trivial-gray-streams:stream-line-column delegate)))
 
 (defun subvec (seq start end)
   (coerce (subseq seq start end) 'vector))
 
 (defun print-diff (stream expected actual matches prefix
-                   expected-suffix actual-suffix ansi?)
+                   expected-suffix actual-suffix)
   (let ((strings? (and
                    (typep expected '(vector character))
                    (typep actual '(vector character))))
+        (ansi? *show-diff-with-ansi-colors*)
         (es (make-instance 'expects-output-stream
                            :items expected))
         (as (make-instance 'expects-output-stream
@@ -92,28 +97,31 @@ when EXPECT-SEQ fails, starting from the first element mismatch.")
             do (ecase (car m)
                  (:match (print-item e es) (print-item a as))
                  (:substitution
-                  (with-color :yellow (es as)
+                  (with-color (when ansi? :yellow) (es as)
                     (print-item e es) (print-item a as))
                   (unless ansi? (princ "~" ms)))
                  (:insertion
-                  (with-color :yellow (as) (print-item a as))
+                  (with-color (when ansi? :green) (as) (print-item a as))
                   (unless ansi? (princ "+" ms)))
                  (:deletion
-                  (with-color :red (es) (print-item e es))
+                  (with-color (when ansi? :red) (es) (print-item e es))
                   (unless ansi? (princ "-" ms))))
             do (sync-visible-positions es as ms))
-      (format stream "Expected: ~A~A~A~%" prefix (get-output-stream-string es) expected-suffix)
-      (format stream "Actual:   ~A~A~A~%" prefix (get-output-stream-string as) actual-suffix)
+      (ansi::print-ansi :fg :reset stream)
+      (format stream "Expected: ~A~A~A~%" prefix (get-output-stream-string
+                                                  (delegate-stream es))
+              expected-suffix)
+      (format stream "Actual:   ~A~A~A~%" prefix (get-output-stream-string
+                                                  (delegate-stream as))
+              actual-suffix)
       (unless ansi?
         (format stream "          ~A~A"
                 (make-string (length prefix) :initial-element #\SPACE)
-                (get-output-stream-string ms))))))
+                (get-output-stream-string (delegate-stream ms)))))))
 
-(defun expect-seq (expected actual
-                   &optional (test 'equal) ansi?)
+(defun expect-seq (expected actual &key (test 'equal))
   "Returns NIL is the sequence are equal, or a SIMPLE-TEST-RESULT
-with a failure description otherwise.
-If ANSI? is not NIL, then the TEST-DESCRIPTION diff will be color-encoded."
+with a failure description otherwise."
   (multiple-value-bind (matches distance)
       (edit-distance:diff expected actual :test test)
     (if (> distance 0)
@@ -147,6 +155,5 @@ If ANSI? is not NIL, then the TEST-DESCRIPTION diff will be color-encoded."
                                       (subvec matches first-shown-index last-diff-index)
                                       prefix
                                       expected-suffix
-                                      actual-suffix
-                                      ansi?))))
+                                      actual-suffix))))
         T)))

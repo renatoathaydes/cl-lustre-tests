@@ -44,4 +44,8 @@
            ;; ansi-test-reporter slots
            #:ansi-enabled?
            ;; simple-test-sequencer slots
-           #:test-sequence-ordering))
+           #:test-sequence-ordering
+           ;; expect-seq configuration
+           #:*max-diff-items-to-display*
+           #:*max-displayed-items-before-diff*
+           #:*show-diff-with-ansi-colors*))
