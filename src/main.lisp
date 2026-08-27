@@ -4,6 +4,7 @@
   "The root of the test hierarchy. Execute all tests by invoking TEST.")
 
 (defun init-root ()
+  "Get the root TEST-PARENT, creating one if necessary."
   (if *root-test-parent*
       *root-test-parent*
       (setf *root-test-parent* (make-instance 'test-parent :name 'ROOT))))

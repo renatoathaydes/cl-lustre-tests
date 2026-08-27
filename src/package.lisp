@@ -4,6 +4,7 @@
   (:import-from #:trivial-gray-streams
                 #:fundamental-character-output-stream)
   (:export #:test
+           #:init-root
            #:test-simple
            #:define-test
            #:make-test-name
