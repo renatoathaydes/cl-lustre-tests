@@ -79,7 +79,7 @@ Actual:   ...c d x f...
      "Levenshtein distance: 2, first diff at 4, showing from 2 to 7
 Expected: ...c d e f g...
 Actual:   ...c d   f x 
-                 -   ~ ")))
+                 -   ~")))
 
 (define-lustre-test expect-seq-not-equal-includes-invisible-characters
   (let ((lustre-tests::*max-diff-items-to-display* 6)
@@ -91,7 +91,7 @@ Actual:   ...c d   f x
        "Levenshtein distance: 3, first diff at 5, showing from 2 to 8
 Expected: ...c d \\x1B e f g...
 Actual:   ...c d \\x1B   f x ...
-                      -   ~ "))))
+                      -   ~"))))
 
 ;;; SAME TESTS REPEATED FOR INTEGER SEQUENCES WITH MEMBERS HAVING MORE THAN ONE DIGIT
 

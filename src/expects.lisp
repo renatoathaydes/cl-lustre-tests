@@ -41,12 +41,12 @@ when EXPECT-SEQ fails, starting from the first element mismatch.")
       (fill-spaces (- max c3) s3))))
 
 (defmacro with-color (color (&rest streams) &body body)
-  (flet ((printing (stream bg-color)
-           `(when ,bg-color
+  (flet ((printing (stream reset?)
+           `(when ,color
               (with-slots (delegate) ,stream
-                (ansi::print-ansi :bg ,bg-color delegate)))))
-    (let ((calls (mapcar (lambda (s) (printing s color)) streams))
-          (resets (mapcar (lambda (s) (printing s :reset)) streams)))
+                (ansi::print-ansi :bg ,(if reset? :reset color) delegate)))))
+    (let ((calls (mapcar (lambda (s) (printing s nil)) streams))
+          (resets (mapcar (lambda (s) (printing s T)) streams)))
       `(progn ,@calls ,@body ,@resets))))
 
 (defmethod trivial-gray-streams:stream-write-char
@@ -90,24 +90,27 @@ when EXPECT-SEQ fails, starting from the first element mismatch.")
                    (format stream "~A" item))
                (unless (or ansi? (stream-done stream))
                  (write-char #\SPACE stream))))
-      (loop for e = (next-item es)
-            for a = (next-item as)
-            for m = (next-item ms)
+      (loop for m = (next-item ms)
             while m
             do (ecase (car m)
-                 (:match (print-item e es) (print-item a as))
+                 (:match
+                     (print-item (next-item es) es)
+                   (print-item (next-item as) as))
                  (:substitution
                   (with-color (when ansi? :yellow) (es as)
-                    (print-item e es) (print-item a as))
+                    (print-item (next-item es) es)
+                    (print-item (next-item as) as))
                   (unless ansi? (princ "~" ms)))
                  (:insertion
-                  (with-color (when ansi? :green) (as) (print-item a as))
+                  (with-color (when ansi? :green) (as)
+                    (print-item (next-item as) as))
                   (unless ansi? (princ "+" ms)))
                  (:deletion
-                  (with-color (when ansi? :red) (es) (print-item e es))
+                  (with-color (when ansi? :red) (es)
+                    (print-item (next-item es) es))
                   (unless ansi? (princ "-" ms))))
             do (sync-visible-positions es as ms))
-      (ansi::print-ansi :fg :reset stream)
+      (when ansi? (ansi::print-ansi :fg :reset stream))
       (format stream "Expected: ~A~A~A~%" prefix (get-output-stream-string
                                                   (delegate-stream es))
               expected-suffix)
