@@ -13,25 +13,11 @@ when EXPECT-SEQ fails, starting from the first element mismatch.")
 (defclass expects-output-stream
     (trivial-gray-streams:fundamental-character-output-stream)
   ((delegate :reader delegate-stream :initform (make-string-output-stream))
-   (items :initarg :items :reader stream-items)
-   (index :initform 0 :accessor item-index)
    (visible-chars :initform 0 :reader visible-chars)))
-
-(defun stream-done (stream)
-  (with-slots (items index) stream
-    (>= index (length items))))
-
-(defun next-item (stream)
-  (with-slots (items index) stream
-    (when (< index (length items))
-      (let ((result (aref items index)))
-        (incf index)
-        result))))
 
 (defun sync-visible-positions (s1 s2 s3)
   (flet ((fill-spaces (len stream)
-           (unless (stream-done stream)
-             (loop repeat len do (write-char #\SPACE stream)))))
+           (loop repeat len do (write-char #\SPACE stream))))
     (let* ((c1 (visible-chars s1))
            (c2 (visible-chars s2))
            (c3 (visible-chars s3))
@@ -69,56 +55,44 @@ when EXPECT-SEQ fails, starting from the first element mismatch.")
   (with-slots (delegate) stream
     (trivial-gray-streams:stream-line-column delegate)))
 
-(defun subvec (seq start end)
-  (coerce (subseq seq start end) 'vector))
-
-(defun print-diff (stream expected actual matches prefix
+(defun print-diff (stream strings? matches prefix
                    expected-suffix actual-suffix)
-  (let ((strings? (and
-                   (typep expected '(vector character))
-                   (typep actual '(vector character))))
-        (ansi? *show-diff-with-ansi-colors*)
-        (es (make-instance 'expects-output-stream
-                           :items expected))
-        (as (make-instance 'expects-output-stream
-                           :items actual))
-        (ms (make-instance 'expects-output-stream
-                           :items matches)))
+  (let ((ansi? *show-diff-with-ansi-colors*)
+        (es (make-instance 'expects-output-stream))
+        (as (make-instance 'expects-output-stream))
+        (ms (make-instance 'expects-output-stream)))
     (labels ((print-item (item stream)
                (if strings?
                    (write-char item stream)
                    (format stream "~A" item))
-               (unless (or ansi? (stream-done stream))
+               (unless (and strings? ansi?)
                  (write-char #\SPACE stream))))
-      (loop for m = (next-item ms)
-            while m
-            do (ecase (car m)
+      (loop for m across matches
+            do (ecase (first m)
                  (:match
-                     (print-item (next-item es) es)
-                   (print-item (next-item as) as))
+                     (print-item (second m) es) (print-item (third m) as))
                  (:substitution
                   (with-color (when ansi? :yellow) (es as)
-                    (print-item (next-item es) es)
-                    (print-item (next-item as) as))
+                    (print-item (second m) es) (print-item (third m) as))
                   (unless ansi? (princ "~" ms)))
                  (:insertion
                   (with-color (when ansi? :green) (as)
-                    (print-item (next-item as) as))
+                    (print-item (third m) as))
                   (unless ansi? (princ "+" ms)))
                  (:deletion
                   (with-color (when ansi? :red) (es)
-                    (print-item (next-item es) es))
+                    (print-item (second m) es))
                   (unless ansi? (princ "-" ms))))
             do (sync-visible-positions es as ms))
       (when ansi? (ansi::print-ansi :fg :reset stream))
       (format stream "Expected: ~A~A~A~%" prefix (get-output-stream-string
                                                   (delegate-stream es))
               expected-suffix)
-      (format stream "Actual:   ~A~A~A~%" prefix (get-output-stream-string
-                                                  (delegate-stream as))
+      (format stream "Actual:   ~A~A~A" prefix (get-output-stream-string
+                                                (delegate-stream as))
               actual-suffix)
       (unless ansi?
-        (format stream "          ~A~A"
+        (format stream "~%          ~A~A"
                 (make-string (length prefix) :initial-element #\SPACE)
                 (get-output-stream-string (delegate-stream ms)))))))
 
@@ -139,7 +113,6 @@ with a failure description otherwise."
                (max-shown-index (+ first-shown-index *max-diff-items-to-display*))
                (expected-last-index (min max-shown-index expected-length))
                (actual-last-index (min max-shown-index actual-length))
-               (last-diff-index (min max-shown-index (max expected-length actual-length)))
                (prefix (if (> first-shown-index 0) "..." ""))
                (expected-suffix (if (< expected-last-index expected-length) "..." ""))
                (actual-suffix (if (< actual-last-index actual-length) "..." "")))
@@ -153,9 +126,13 @@ with a failure description otherwise."
                                   first-shown-index
                                   (max expected-last-index actual-last-index))
                           (print-diff s
-                                      (subvec expected first-shown-index expected-last-index)
-                                      (subvec actual first-shown-index actual-last-index)
-                                      (subvec matches first-shown-index last-diff-index)
+                                      (and
+                                       (typep expected '(vector character))
+                                       (typep actual '(vector character)))
+                                      (coerce (subseq matches
+                                                      first-shown-index
+                                                      (min (length matches) (1+ max-shown-index)))
+                                              'vector)
                                       prefix
                                       expected-suffix
                                       actual-suffix))))

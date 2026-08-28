@@ -154,3 +154,28 @@ Actual:   10 66 12 13...
 Expected: ...12 13 14 15...
 Actual:   ...12 13 66 15...
                    ~  ")))
+
+(define-lustre-test expect-seq-diff-with-ansi-colors
+  (let ((lustre-tests::*max-diff-items-to-display* 24)
+        (lustre-tests::*max-displayed-items-before-diff* 4)
+        (lustre-tests:*show-diff-with-ansi-colors* T))
+    (macrolet ((print-colored (color text stream)
+                 `(progn
+                    (ansi::print-ansi :bg ,color ,stream)
+                    (write-string ,text ,stream)
+                    (ansi::print-ansi :bg :reset ,stream))))
+      (assert-failed-description
+       (lustre-tests:expect-seq #(10 11 12 13 14 15 16 17 18) '(10 11 12 13 15 16 77 18 19 20))
+       (with-output-to-string (s)
+         (format s "~A~%" "Levenshtein distance: 4, first diff at 4, showing from 0 to 10")
+         (ansi::print-ansi :fg :reset s)
+         (write-string "Expected: 10 11 12 13 " s)
+         (print-colored :red "14 " s)
+         (write-string "15 16 " s)
+         (print-colored :yellow "17 " s)
+         (write-string "18       " s)
+         (format s "~%~A" "Actual:   10 11 12 13    15 16 ")
+         (print-colored :yellow "77 " s)
+         (write-string "18 " s)
+         (print-colored :green "19 " s)
+         (print-colored :green "20 " s))))))
