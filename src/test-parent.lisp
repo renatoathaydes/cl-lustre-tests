@@ -114,3 +114,31 @@ including the initial PARENT."
       (dotests next-parent on-child on-start-parent on-end-parent)))
   (when on-end-parent
     (funcall on-end-parent parent)))
+
+(defun dotests-parallel (parent on-child
+                         &optional on-start-parent on-end-parent sequencer)
+  "As DOTESTS, but runs each TEST-PARENT direct children on a different Thread."
+  (flet ((thread-worker (tests on-child)
+           (dolist (child tests)
+             (funcall on-child child))
+           (mapcar #'test-result tests)))
+    (when on-start-parent
+      (funcall on-start-parent parent))
+    (multiple-value-bind (parents non-parents)
+        (partition-parents parent)
+      (let* ((children (if sequencer
+                           (sequence-tests sequencer non-parents)
+                           non-parents))
+             (thread (bt:make-thread (lambda () (thread-worker children on-child))
+                                     :name (format nil "~A" (test-name parent)))))
+        ;; do the next parents while the current parent's children run
+        (dolist (next-parent (if sequencer
+                                 (sequence-parents sequencer parents)
+                                 parents))
+          (dotests next-parent on-child on-start-parent on-end-parent))
+        ;; wait for the children's results
+        (loop for result in (bt:join-thread thread)
+              for child in children
+              do (setf (test-result child) result))))
+    (when on-end-parent
+      (funcall on-end-parent parent))))

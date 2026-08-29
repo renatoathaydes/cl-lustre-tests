@@ -40,7 +40,8 @@ The body should return NIL to pass. Use an assertion macro to set up proper erro
                (stream *standard-output*)
                (sequencer (make-instance 'simple-test-sequencer))
                (reporter (make-instance 'ansi-test-reporter))
-               (signal-condition-on-error? nil))
+               (signal-condition-on-error? nil)
+               (parallel? nil))
   "Run all tests.
 The test protocol is as follows:
   - report-start
@@ -49,7 +50,9 @@ The test protocol is as follows:
   - report-result (for each test)
   - report-end
 If SIGNAL-CONDITION-ON-ERROR? is NIL, test evaluation proceeds as normal,
-otherwise a TEST-ERROR condition is signalled on each test failure or error."
+otherwise a TEST-ERROR condition is signalled on each test failure or error.
+If PARALLEL? is NIL, tests run on the caller Thread, otherwise each
+TEST-PARENT runs its children on a different Thread."
   (let ((ctx nil))
     (flet ((on-start-parent (p)
              (setf ctx (report-start stream reporter p ctx)))
@@ -64,16 +67,19 @@ otherwise a TEST-ERROR condition is signalled on each test failure or error."
                (when (and signal-condition-on-error?
                           (not (eql :ok (test-result-status result))))
                  (error 'test-error :reason (test-result-description result))))))
-      (dotests test-parent #'on-child #'on-start-parent #'on-end-parent sequencer))))
+      (let ((iterate (if parallel? #'dotests-parallel #'dotests)))
+        (funcall iterate test-parent #'on-child #'on-start-parent #'on-end-parent sequencer)))))
 
 (defun test-simple (&key
                       (test-parent (init-root))
                       (stream *standard-output*)
                       (sequencer (make-instance 'simple-test-sequencer))
-                      (signal-condition-on-error? nil))
+                      (signal-condition-on-error? nil)
+                      (parallel? nil))
   "Call TEST with the REPORTER set to an instance of SIMPLE-TEST-REPORTER."
   (test :test-parent test-parent
         :stream stream
         :sequencer sequencer
         :signal-condition-on-error? signal-condition-on-error?
-        :reporter (make-instance 'simple-test-reporter)))
+        :reporter (make-instance 'simple-test-reporter)
+        :parallel? parallel?))
