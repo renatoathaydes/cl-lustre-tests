@@ -10,7 +10,11 @@
   :author      "Renato Athaydes"
   :license     "MIT"
   :version     "0.1.0"
-  :depends-on  ("format-ansi" "edit-distance" "trivial-gray-streams")
+  :depends-on  ("alexandria"
+                "format-ansi"
+                "edit-distance"
+                "trivial-gray-streams"
+                "bordeaux-threads")
   :components ((:module "color-sexp"
                 :pathname "src/color-sexp"
                 :components ((:file "package")

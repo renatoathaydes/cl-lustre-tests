@@ -38,10 +38,10 @@
     (lt:define-test final-test () T)
     (flet ((do-sequence-tests ()
              (let* ((sequencer (make-instance 'lt:simple-test-sequencer
-                                              :ordering :random))
-                    (cl:*random-state* (make-random-state)))
+                                              :ordering :random)))
                (mapcar #'lt:test-name
                        (lt:sequence-tests sequencer (lt:test-children root))))))
       (let ((r1 (do-sequence-tests))
             (r2 (do-sequence-tests)))
-        (assert (equalp r1 r2))))))
+        ;; sequencing twice should have an extremely low probability of the same result
+        (assert-nil (equalp r1 r2))))))
