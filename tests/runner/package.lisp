@@ -10,9 +10,9 @@
                     (funcall ,name)
                     :ok)
      (error (e)
-       (format T "ERROR: ~A~%  ~A~%"
-               (symbol-name ,name)
-               e)
+       (ansi:format-ansi T `(
+                             (:fg :red "ERROR: ~A~%" ,(symbol-name ,name))
+                             ("  ~A~%" ,e)))
        :failed)))
 
 (defun run-tests (&key (on-error :condition))
