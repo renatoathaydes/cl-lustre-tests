@@ -45,7 +45,7 @@
 
 (defun color-sexp (sexp &optional (stream *standard-output*) action)
   "Colorize S-expression, printing the result to STREAM."
-  (case action
+  (ecase action
     ((:start-list nil) (princ #\( stream))
     (:start-array (princ #\[ stream)))
   (when (eql action :start) )
@@ -64,7 +64,7 @@
              (when color
                (ansi:format-ansi stream `((:fg ,color "~S" ,term)))))
         do (setf first? nil))
-  (case action
+  (ecase action
     ((:start-list nil) (princ #\) stream))
     (:start-array (princ #\] stream)))
   nil)

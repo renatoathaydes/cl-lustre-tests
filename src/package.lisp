@@ -5,6 +5,7 @@
                 #:fundamental-character-output-stream)
   (:export #:test
            #:init-root
+           #:clear-tests
            #:test-simple
            #:define-test
            #:make-test-name
@@ -24,6 +25,7 @@
            #:sequence-parents
            #:report-start
            #:report-result
+           #:report-result-description
            #:report-end
            #:simple-test-result
            #:simple-test
@@ -41,6 +43,7 @@
            #:test-children
            ;; test-object slots
            #:test-name
+           #:test-package
            #:test-enabled?
            ;; ansi-test-reporter slots
            #:ansi-enabled?

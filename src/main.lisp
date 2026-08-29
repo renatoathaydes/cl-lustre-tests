@@ -9,6 +9,10 @@
       *root-test-parent*
       (setf *root-test-parent* (make-instance 'test-parent :name 'ROOT))))
 
+(defun clear-tests ()
+  "Deletes all tests from the default TEST-PARENT root."
+  (setf *root-test-parent* nil))
+
 (defun make-test-name (name)
   "Convert the name to a SYMBOL."
   (typecase name
@@ -26,7 +30,8 @@ The body should return NIL to pass. Use an assertion macro to set up proper erro
        (add-test
         (make-instance 'simple-test :name ,test-name
                                     :body '(,@body)
-                                    :fun (lambda () ,@body))
+                                    :fun (lambda () ,@body)
+                                    :pkg *package*)
         (init-root)
         (mapcar #'make-test-name ',parents)))))
 
@@ -44,7 +49,7 @@ The test protocol is as follows:
   - report-result (for each test)
   - report-end
 If SIGNAL-CONDITION-ON-ERROR? is NIL, test evaluation proceeds as normal,
-otherwise a TEST-ERROR is signalled on each test failure or error."
+otherwise a TEST-ERROR condition is signalled on each test failure or error."
   (let ((ctx nil))
     (flet ((on-start-parent (p)
              (setf ctx (report-start stream reporter p ctx)))

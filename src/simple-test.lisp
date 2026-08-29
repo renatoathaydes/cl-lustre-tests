@@ -4,7 +4,9 @@
   ((body :reader test-body :initarg :body
          :initform (error "must supply :body"))
    (fun :reader test-fun :initarg :fun
-        :initform (error "must supply :fun")))
+        :initform (error "must supply :fun"))
+   (pkg :reader test-package :initarg :pkg
+        :initform nil))
   (:documentation "A SIMPLE-TEST contains a BODY that is a form that can be evaluated when
 the test runs."))
 
@@ -25,10 +27,6 @@ the test runs."))
                        'simple-test-result
                        :status (if result :ok :failed)
                        :duration (- (get-internal-real-time) start-time)
-                       :description (unless result
-                                      (with-output-to-string (s)
-                                        (lustre-tests/color-sexp:color-sexp
-                                         (test-body test) s)
-                                        (format s " => ~A"  result))))))))
+                       :description result)))))
     (setf (test-result test) t-result)
     test))

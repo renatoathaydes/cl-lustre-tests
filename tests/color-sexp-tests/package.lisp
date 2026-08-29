@@ -62,7 +62,7 @@
    (ansi-seq "("
              (:fg cs:+default-standard-macro-color+ "DEFUN")
              " "
-             (:fg cs:+default-symbol-color+ ":MY-FUN")
+             (:fg cs:+default-keyword-color+ ":MY-FUN")
              " ("
              (:fg cs:+default-symbol-color+ "ARG")
              " "

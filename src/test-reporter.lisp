@@ -22,13 +22,22 @@
 (defun increment-indent (ctx)
   (cons (concatenate 'string "  " (car ctx)) (cdr ctx)))
 
+(defun test-full-name (test)
+  (let ((name (test-name test)))
+    (if (typep test 'simple-test)
+        (let ((pkg (test-package test)))
+          (if pkg
+              (format nil "~A::~A" (package-name pkg) name)
+              name))
+        name)))
+
 (defmethod report-start (stream (reporter simple-test-reporter) parent ctx)
   (if (null ctx)
       (progn
         (format stream "== LUSTRE TESTS ==~%~%Running ~A test(s).~%" (count-tests parent))
         (create-ctx parent))
       (progn
-        (format stream "  ~A>> ~A~%" (car ctx) (test-name parent))
+        (format stream "  ~A>> ~A~%" (car ctx) (test-full-name parent))
         (increment-indent ctx))))
 
 (defmethod report-start (stream (reporter ansi-test-reporter) parent ctx)
@@ -42,8 +51,30 @@
       (progn
         (ansi:format-ansi
          stream
-         `((:st :bold :fg :cyan "  ~A>> ~A~%" ,(car ctx) ,(test-name parent))))
+         `((:st :bold :fg :cyan "  ~A>> ~A~%" ,(car ctx) ,(test-full-name parent))))
         (increment-indent ctx))))
+
+(defmethod report-result-description (stream
+                                      (reporter counting-test-reporter)
+                                      (test test-object)
+                                      description
+                                      ctx)
+  (format stream "~A~%" description))
+
+(defmethod report-result-description (stream
+                                      (reporter counting-test-reporter)
+                                      (test simple-test)
+                                      description
+                                      ctx)
+  (format stream "~A => ~A~%" (test-body test) description))
+
+(defmethod report-result-description (stream
+                                      (reporter ansi-test-reporter)
+                                      (test simple-test)
+                                      description
+                                      ctx)
+  (lustre-tests/color-sexp:color-sexp (test-body test) stream)
+  (format stream " => ~A~%" description))
 
 (defmethod report-result (stream (reporter counting-test-reporter) (test test-object) ctx)
   (case (test-result-status (test-result test))
@@ -56,29 +87,32 @@
   (let* ((result (test-result test))
          (duration (test-duration result)))
     (case (test-result-status result)
-      (:ok (format stream "~AOK: ~A (~A)~%" (car ctx) (test-name test) duration))
-      (otherwise (format stream "~A~A: ~A~%~A~%"
-                         (car ctx)
-                         (test-result-status result)
-                         (test-name test)
-                         (test-result-description result))))))
+      (:ok (format stream "~AOK: ~A (~A)~%" (car ctx) (test-full-name test) duration))
+      (otherwise (let ((desc (test-result-description result)))
+                   (format stream "~A~A: ~A~%"
+                           (car ctx)
+                           (test-result-status result)
+                           (test-full-name test))
+                   (report-result-description stream reporter test desc ctx))))))
 
 (defmethod report-result (stream (reporter ansi-test-reporter) (test test-object) ctx)
   (call-next-method)
-  (let* ((result (test-result test))
-         (duration (test-duration result)))
+  (let* ((name (test-full-name test))
+         (result (test-result test))
+         (duration (test-duration result))
+         (desc (test-result-description result))
+         (simple? (typep test 'simple-test)))
     (case (test-result-status result)
       (:ok
        (ansi:format-ansi stream `((:fg :green "~AOK: " ,(car ctx))
-                                  (:st :bold "~A (~A)~%" ,(test-name test) ,duration))))
+                                  (:st :bold "~A (~A)~%" ,name ,duration))))
       (:error
        (ansi:format-ansi stream `((:fg :red "~AERROR: " ,(car ctx))
-                                  (:fg :red :st :bold "~A (~A)~%" ,(test-name test) ,duration)
-                                  (:fg :red "~A~%" ,(test-result-description result)))))
+                                  (:fg :red :st :bold "~A (~A)~%" ,name ,duration))))
       (otherwise
        (ansi:format-ansi stream `((:fg :yellow "~A~A: " ,(car ctx) ,(test-result-status result))
-                                  (:fg :yellow :st :bold "~A (~A)~%" ,(test-name test) ,duration)
-                                  (:fg :yellow "~A~%" ,(test-result-description result))))))))
+                                  (:fg :yellow :st :bold "~A (~A)~%" ,name ,duration)))
+       (report-result-description stream reporter test desc ctx)))))
 
 (defmethod report-end (stream (reporter counting-test-reporter) parent ctx)
   (when (eq (cdr ctx) parent)

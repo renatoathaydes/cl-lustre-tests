@@ -2,7 +2,8 @@
 
 (defclass test-result ()
   ((status :reader test-result-status :initarg :status :initform :ok)
-   (duration :reader test-duration :initarg :duration :initform 0))
+   (duration :reader test-duration :initarg :duration :initform 0)
+   (description :reader test-result-description :initarg :description :initform nil))
   (:documentation "The result of running a test.
 It should be pretty-printable so it can be shown in test reports.
 The STATUS should be :OK, :FAILED or :ERROR.
@@ -77,3 +78,12 @@ for each TEST invocation.")
   (:method (stream (reporter test-reporter) parent ctx)
     (error "REPORT-END not implemented for TEST-REPORTER.")))
 
+(defgeneric report-result-description (stream reporter test description ctx)
+  (:documentation "Reports the TEST-RESULT-DESCRIPTION for a TEST-OBJECT.
+This method allows describing precisely why a test failed.
+Unlike the other TEST-REPORTER methods, this method is not called directly by the
+TEST function. Most implementations of REPORT-RESULT are expected to call it so
+that it's possible to customize the result description without having to create a
+full reporter type.")
+  (:method (stream (reporter test-reporter) (test test-object) description ctx)
+    (error "REPORT-RESULT-DESCRIPTION not implemented for TEST-REPORTER.")))
