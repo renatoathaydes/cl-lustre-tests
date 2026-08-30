@@ -1,8 +1,9 @@
 (defpackage #:lustre-tests
   (:use #:cl)
-  (:documentation "The cl-lustre-tests package.")
+  (:documentation "The lustre-tests core package.")
   (:import-from #:trivial-gray-streams
                 #:fundamental-character-output-stream)
+  (:local-nicknames (#:time #:lustre-tests/time))
   (:export #:test
            #:init-root
            #:clear-tests

@@ -73,12 +73,20 @@
     (:error (incf (slot-value reporter 'error-count)))
     (otherwise (incf (slot-value reporter 'fail-count)))))
 
+(defun print-duration (duration stream)
+  (write-char #\( stream)
+  (time:print-time duration stream)
+  (write-char #\) stream)
+  (terpri stream))
+
 (defmethod report-result (stream (reporter simple-test-reporter) (test test-object) ctx)
   (call-next-method)
   (let* ((result (test-result test))
          (duration (test-duration result)))
     (case (test-result-status result)
-      (:ok (format stream "~AOK: ~A (~A)~%" (car ctx) (test-full-name test) duration))
+      (:ok
+       (format stream "~AOK: ~A " (car ctx) (test-full-name test))
+       (print-duration duration stream))
       (otherwise (let ((desc (test-result-description result)))
                    (format stream "~A~A: ~A~%"
                            (car ctx)
@@ -95,13 +103,16 @@
     (case (test-result-status result)
       (:ok
        (ansi:format-ansi stream `((:fg :green "~AOK: " ,(car ctx))
-                                  (:st :bold "~A (~A)~%" ,name ,duration))))
+                                  (:st :bold "~A " ,name)))
+       (print-duration duration stream))
       (:error
        (ansi:format-ansi stream `((:fg :red "~AERROR: " ,(car ctx))
-                                  (:fg :red :st :bold "~A (~A)~%" ,name ,duration))))
+                                  (:fg :red :st :bold "~A " ,name)))
+       (print-duration duration stream))
       (otherwise
        (ansi:format-ansi stream `((:fg :yellow "~A~A: " ,(car ctx) ,(test-result-status result))
-                                  (:fg :yellow :st :bold "~A (~A)~%" ,name ,duration)))
+                                  (:fg :yellow :st :bold "~A " ,name)))
+       (print-duration duration stream)
        (report-result-description stream reporter test desc ctx)))))
 
 (defmethod report-end (stream (reporter counting-test-reporter) parent ctx)

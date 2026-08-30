@@ -19,14 +19,17 @@
                 :pathname "src/color-sexp"
                 :components ((:file "package")
                              (:file "core" :depends-on ("package"))))
+               (:module "time"
+                :pathname "src/time"
+                :components ((:file "package")))
                (:module "src"
-                :depends-on ("color-sexp")
+                :depends-on ("color-sexp" "time")
                 :components ((:file "package")
                              (:file "protocol" :depends-on ("package"))
                              (:file "test-result" :depends-on ("protocol"))
                              (:file "simple-test" :depends-on ("protocol"))
                              (:file "test-parent" :depends-on ("protocol"))
-                             (:file "test-reporter" :depends-on ("protocol"))
+                             (:file "test-reporter" :depends-on ("simple-test"))
                              (:file "test-sequencer" :depends-on ("protocol"))
                              (:file "expects" :depends-on ("simple-test"))
                              (:file "main" :depends-on ("test-reporter" "test-sequencer")))))
@@ -42,6 +45,8 @@
   :components ((:module "basic-test-framework"
                 :components ((:file "package")))
                (:module "color-sexp-tests"
+                :components ((:file "package")))
+               (:module "time-tests"
                 :components ((:file "package")))
                (:module "tests"
                 :depends-on ("basic-test-framework")
