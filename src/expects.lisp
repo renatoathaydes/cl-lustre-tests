@@ -146,5 +146,5 @@ If a RESTART is used, this function may return the restart value."
                                                    prefix
                                                    expected-suffix
                                                    actual-suffix)))))
-          (cerror 'test-done :result result))
+          (cerror "Ignore test result." 'test-done :result result))
         T)))

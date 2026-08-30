@@ -41,7 +41,7 @@ The body should return NIL to pass. Use an assertion macro to set up proper erro
                (sequencer (make-instance 'simple-test-sequencer))
                (reporter (make-instance 'ansi-test-reporter))
                (signal-condition-on-error? nil)
-               (parallel? nil))
+               (parallel? T))
   "Run all tests.
 The test protocol is as follows:
   - report-start

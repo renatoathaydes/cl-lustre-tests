@@ -121,6 +121,7 @@ Besides being useful for test organization, using test parents also enables para
 calling the `test` functions with `:parallel T` causes each TEST-PARENT to run its children on a separate Thread.
 
 <div id="assertions" />
+
 ## Assertions
 
 In many cases, Common Lisp's default assertions are good enough for testing.
@@ -225,7 +226,22 @@ CL-USER> (lt:find-test 'foo *)
 #<LT:SIMPLE-TEST {80065F75B3}>
 ```
 
-As explained in the previous section, you can run all children of a test parent with the `test` functions.
+## Running tests
+
+As explained in the previous section, you can run all children of a test parent with one of the `test` functions.
+
+```lisp
+CL-USER> (defparameter p (lt:find-test 'p1 (lt:init-root)))
+P
+CL-USER> (lt:test :test-parent p)
+```
+
+The default test root, given by `(lt:init-root)`, is the default value for the `:test-parent` parameter,
+so to run all tests, just omit it:
+
+```lisp
+CL-USER> (lt:test)
+```
 
 To run just a single `TEST-OBJECT` (usually of type `SIMPLE-TEST`) you need to use the `lt:eval-test` method:
 
@@ -243,6 +259,21 @@ The test result is set on the `TEST-OBJECT` either way. You can print it as foll
 ```lisp
 CL-USER> (lt:test-result test)
 ```
+
+### Test functions
+
+The `lt:test` function is the preferred function for running tests on a CI server or the terminal. It uses
+appropriate defaults for that:
+
+* the `ansi-test-reporter`, which prints results in colors using ANSI codes.
+* it does not signal conditions on test failures, so all tests run to completion even if previous tests failed.
+* each `TEST-PARENT` runs its children on a separate Thread.
+* tests run in declaration order.
+
+The `lt:test-simple` function is better for the REPL. The differences from `lt:test` are:
+
+* it uses `simple-test-reporter` (no ANSI colors).
+* tests are not run in parallel.
 
 ## Deleting tests
 
