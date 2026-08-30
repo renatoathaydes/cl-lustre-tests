@@ -105,8 +105,10 @@ when EXPECT-SEQ fails, starting from the first element mismatch.")
                 (get-output-stream-string (delegate-stream ms)))))))
 
 (defun expect-seq (expected actual &key (test 'equal))
-  "Returns NIL is the sequence are equal, or a SIMPLE-TEST-RESULT
-with a failure description otherwise."
+  "Returns T if the sequences are equal.
+Otherwise signals a TEST-DONE condition with a SIMPLE-TEST-RESULT
+containing details about the test failure.
+If a RESTART is used, this function may return the restart value."
   (multiple-value-bind (matches distance)
       (edit-distance:diff expected actual :test test)
     (if (> distance 0)
@@ -123,25 +125,26 @@ with a failure description otherwise."
                (actual-last-index (min max-shown-index (1- actual-length)))
                (prefix (if (> first-shown-index 0) "..." ""))
                (expected-suffix (if (< expected-last-index (1- expected-length)) "..." ""))
-               (actual-suffix (if (< actual-last-index (1- actual-length)) "..." "")))
-          (make-instance
-           'simple-test-result
-           :status :failed
-           :description (with-output-to-string (s)
-                          (format s "Levenshtein distance: ~D, first diff at ~D, showing from ~D to ~D~%"
-                                  distance
-                                  first-diff-index
-                                  first-shown-index
-                                  (max expected-last-index actual-last-index))
-                          (print-diff s
-                                      (and
-                                       (typep expected '(vector character))
-                                       (typep actual '(vector character)))
-                                      (coerce (subseq matches
-                                                      first-shown-index
-                                                      (min (length matches) (1+ max-shown-index)))
-                                              'vector)
-                                      prefix
-                                      expected-suffix
-                                      actual-suffix))))
+               (actual-suffix (if (< actual-last-index (1- actual-length)) "..." ""))
+               (result (make-instance
+                        'simple-test-result
+                        :status :failed
+                        :description (with-output-to-string (s)
+                                       (format s "Levenshtein distance: ~D, first diff at ~D, showing from ~D to ~D~%"
+                                               distance
+                                               first-diff-index
+                                               first-shown-index
+                                               (max expected-last-index actual-last-index))
+                                       (print-diff s
+                                                   (and
+                                                    (typep expected '(vector character))
+                                                    (typep actual '(vector character)))
+                                                   (coerce (subseq matches
+                                                                   first-shown-index
+                                                                   (min (length matches) (1+ max-shown-index)))
+                                                           'vector)
+                                                   prefix
+                                                   expected-suffix
+                                                   actual-suffix)))))
+          (cerror 'test-done :result result))
         T)))

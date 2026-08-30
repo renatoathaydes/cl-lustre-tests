@@ -3,10 +3,18 @@
 (defun assert-ok-result (result)
   (assert (eq result T)))
 
-(defun assert-failed-description (result expected)
-  (assert result)
-  (assert (eq (lt:test-result-status result) :failed))
-  (assert (string= (lt:test-result-description result) expected)))
+(defmacro assert-failed-description (expr expected)
+  `(let ((result (handler-case
+                     (progn
+                       ,expr
+                       (assert
+                        nil ()
+                        "Expected TEST-DONE condition, but nothing was signalled."))
+                   (lt:test-done (c)
+                     (lt:test-done-result c)))))
+     (assert result)
+     (assert (eq (lt:test-result-status result) :failed))
+     (assert (string= (lt:test-result-description result) ,expected))))
 
 (define-lustre-test expect-seq-equal-seqs
   (assert-ok-result (lt:expect-seq "" "")))

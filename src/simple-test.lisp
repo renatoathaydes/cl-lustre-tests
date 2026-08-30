@@ -39,7 +39,7 @@ the test runs."))
                        :duration (- (get-internal-real-time) start-time))))))
     (setf (test-result test) t-result)
     (unless (eq :ok (test-result-status t-result))
-      (cerror "Ignore test failure" 'test-error
+      (cerror "Ignore test failure." 'test-error
               :reason (format nil "Test ~A failed.~%~A"
                               (test-full-name test)
                               (test-result-description t-result))))

@@ -34,7 +34,14 @@
            #:counting-test-reporter
            #:simple-test-reporter
            #:ansi-test-reporter
+           ;; conditions
            #:test-error
+           #:test-done
+           ;; test-error slots
+           #:test-error-reason
+           ;; test-done slots
+           #:test-done-result
+           ;; assertions
            #:expect-seq
            ;; test-result slots
            #:test-result-status

@@ -43,6 +43,13 @@ It must not create tests itself."))
   (:report (lambda (condition stream)
              (format stream "~A~%" (test-error-reason condition)))))
 
+(define-condition test-done (error)
+  ((result :initarg :result :reader test-done-result
+           :initform (error "Must provide :result initarg")))
+  (:documentation "A condition that can interrupt a test with a specific TEST-RESULT.")
+  (:report (lambda (condition stream)
+             (format stream "~A~%" (test-done-result condition)))))
+
 (defgeneric eval-test (test)
   (:documentation "Run a TEST-OBJECT.
 Return the TEST-OBJECT with its TEST-RESULT having been set.")

@@ -63,12 +63,16 @@ CL-USER> (lt:test-simple)
 A Lustre Test is a function which gets wrapped into an instance of `LT:SIMPLE-TEST` by default. `lt:define-test` makes an instance of that
 class and add the test name to the ROOT parent (accessible via `lt:init-root)`).
 
-If the function returns an instance of `LT:TEST-RESULT`, that's used, otherwise it's assumed that that does not signal any conditions
-passed. Hence, you should use assertions such as:
+If the function returns an instance of `LT:TEST-RESULT`, that's used as the actual result for the test,
+otherwise it's assumed that, as the test did not signal any conditions, it must have passed.
+
+Hence, one should always use assertions in tests such as:
 
 * `assert` (CL default assertions, enough for most cases as errors show the values in an expression).
 * `check-type` (also from CL, can be useful to verify types).
 * `lt:expect-seq` compares two sequences' elements and on failure, prints a pretty diff (using colors if enabled).
+
+More information about `expect-seq` in the [Assertions](#assertions) section below.
 
 Example test:
 
@@ -116,6 +120,36 @@ Which, for the example above, prints:
 Besides being useful for test organization, using test parents also enables parallelization:
 calling the `test` functions with `:parallel T` causes each TEST-PARENT to run its children on a separate Thread.
 
+<div id="assertions" />
+## Assertions
+
+In many cases, Common Lisp's default assertions are good enough for testing.
+For example, `assert` shows a nice message when it fails that includes runtime values from the assertion:
+
+```lisp
+CL-USER> (defparameter x 5)
+X
+CL-USER> (lt:define-test arithmetics-work? ()
+           (assert (= (+ 2  x) 5)))
+NIL
+CL-USER> (lt:test-simple)
+== LUSTRE TESTS ==
+
+Running 1 test(s).
+ERROR: COMMON-LISP-USER::ARITHMETICS-WORK?
+(PROGN (ASSERT (= (+ 2 X) 5))) =>
+    The assertion (= (+ 2 X) 5) failed with (+ 2 X) = 7.
+Success: 0, Failures: 0, Errors: 1
+NIL
+```
+
+It can be clearly seen that the expression that failed the assertion evaluated to `7`, not the expected `5`.
+
+For this reason, Lustre Tests only provides a single assertion, `lt:expect-seq`, that gives a lot of value when compared to that.
+That's especially true when comparing large sequences (including strings) which can differ in subtle, hard to see ways.
+
+TODO add `expect-seq` examples with colors.
+
 ## Debugging tests
 
 While working on tests, you can use the REPL very conveniently.
@@ -153,7 +187,7 @@ failed with
    [Condition of type LT:TEST-ERROR]
 
 Restarts:
- 0: [CONTINUE] Ignore test failure
+ 0: [CONTINUE] Ignore test failure.
  1: [RETRY] Retry SLIME REPL evaluation request.
  2: [*ABORT] Return to SLIME's top level.
  3: [ABORT] Exit debugger, returning to top level.
