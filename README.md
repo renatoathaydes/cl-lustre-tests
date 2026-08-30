@@ -2,12 +2,15 @@
 
 **Common Lisp - Lustre Tests** is a powerful testing framework that focuses on usability and great reporting.
 
+The design of this library is based on a simple CLOS [protocol](src/protocol.lisp) that makes it easy to extend.
+For most users, however, things should work out-of-the-box without requiring any understanding of it at all.
+
 ## Getting Started
 
 Add a dependency to the `cl-lustre-tests` system to your `.asd` file:
 
 ```lisp
-  :depends-on  (cl-lustre-tests")
+  :depends-on  ("cl-lustre-tests")
 ```
 
 Also, configure your `asdf:test-op` to invoke the `test` function from this system:
@@ -50,9 +53,9 @@ Or in the REPL:
 CL-USER> (lt:test-simple)
 ```
 
-> The `test-simple` function uses a `simple-test-reporter` instead of `ansi-test-reporter`
-  (which is more appropriate on the terminal as it prints colorful reports via ANSI color codes)
-  which is the default used by the `test` function.
+> The `test-simple` function uses a `simple-test-reporter` instead of `ansi-test-reporter`,
+  which is more appropriate on the terminal as it prints colorful reports via ANSI color codes,
+  and is the default used by the `test` function.
   You can enable ANSI colors on SLIME, if you want, by using the [slime-repl-ansi-color](https://gitlab.com/renatoathaydes/slime-repl-ansi-color/-/tree/master) mode, so colors work also on emacs!
 
 ## Writing Tests
@@ -64,7 +67,7 @@ If the function returns an instance of `LT:TEST-RESULT`, that's used, otherwise 
 passed. Hence, you should use assertions such as:
 
 * `assert` (CL default assertions, enough for most cases as errors show the values in an expression).
-* `check-type`
+* `check-type` (also from CL, can be useful to verify types).
 * `lt:expect-seq` compares two sequences' elements and on failure, prints a pretty diff (using colors if enabled).
 
 Example test:
@@ -76,6 +79,8 @@ Example test:
 
 > Recompiling the test replaces it just like a normal function. This allows fixing tests in the REPL by re-compiling the test
   or the implementation and immediately using the `RETRY` restart.
+
+For more realistic examples, look at Lustre-Tests' [own tests](tests/tests/).
 
 ## Grouping tests
 
