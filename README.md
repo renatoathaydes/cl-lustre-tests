@@ -111,8 +111,123 @@ Which, for the example above, prints:
       - FOO
 ```
 
+### Test Parallelization
 
-TODO
+Besides being useful for test organization, using test parents also enables parallelization:
+calling the `test` functions with `:parallel T` causes each TEST-PARENT to run its children on a separate Thread.
+
+## Debugging tests
+
+While working on tests, you can use the REPL very conveniently.
+Call the test function with `:signal-condition-on-error? T` so that the debugger is called on each test failure,
+which you can then try to fix and then restart with `RETRY`.
+
+```lisp
+CL-USER> (lt:test-simple :signal-condition-on-error? T)
+```
+
+You can also use `find-test` to run only tests under a specific TEST-PARENT:
+
+```lisp
+CL-USER> (lt:find-test 'my-test-parent (lt:init-root))
+```
+
+If you store the TEST-PARENT in a variable `P` for example, run it with:
+
+```lisp
+CL-USER> (lt:test-simple :test-parent p :signal-condition-on-error? T)
+```
+
+For each test that fails, the debugger will stop with the following restarts:
+
+```lisp
+Test LUSTRE-TESTS/TIME/TESTS::PRINT-TIME-WITH-ALL-UNITS failed.
+The assertion
+(STRING= "18hr, 45mn, 1sec, 234ms, 567µs"
+         (LUSTRE-TESTS/TIME/TESTS::PRINT-TIME-TO-STRING
+          (+ (* 18 60 60 1000000) (* 45 60 1000000) 1234567)))
+failed with
+(LUSTRE-TESTS/TIME/TESTS::PRINT-TIME-TO-STRING
+ (+ (* 18 60 60 1000000) (* 45 60 1000000) 1234567))
+= "18hr, 45min, 1sec, 234ms, 567µs".
+   [Condition of type LT:TEST-ERROR]
+
+Restarts:
+ 0: [CONTINUE] Ignore test failure
+ 1: [RETRY] Retry SLIME REPL evaluation request.
+ 2: [*ABORT] Return to SLIME's top level.
+ 3: [ABORT] Exit debugger, returning to top level.
+```
+
+Try to fix the cause of the error, recompile the function in SLIME then hit `1` to invoke `RETRY`.
+To continue to the next test anyway, use the `CONTINUE` restart (the test still shows as having failed in the report).
+
+## Finding tests
+
+As mentioned in the previous section, you can find a test with `lt:find-test`:
+
+```lisp
+CL-USER> (lt:find-test 'my-test-parent (lt:init-root))
+```
+
+The `lt:find-test` function, as the `lt:define-test` macro, allows declaring the test parents as well, so to find a test
+called `FOO` under the `P1 -> P2` parents, use:
+
+```lisp
+CL-USER> (lt:find-test 'foo (lt:init-root) '(p1 p2))
+```
+
+> Notice that you may need to use the fully qualified symbol to find a test if you're not in the same package.
+
+The `lt:find-test` finds both `TEST-PARENT` and `TEST-OBJECT` (runnable tests).
+Once you have a test parent, you can then find more tests under it again, so you could do this as well:
+
+```lisp
+CL-USER> (lt:find-test 'p1 (lt:init-root))
+#<LT:TEST-PARENT {800961E3D3}>
+CL-USER> (lt:find-test 'p2 *)
+#<LT:TEST-PARENT {800961F8F3}>
+CL-USER> (lt:find-test 'foo *)
+#<LT:SIMPLE-TEST {80065F75B3}>
+```
+
+As explained in the previous section, you can run all children of a test parent with the `test` functions.
+
+To run just a single `TEST-OBJECT` (usually of type `SIMPLE-TEST`) you need to use the `lt:eval-test` method:
+
+```lisp
+CL-USER> (lt:find-test 'foo (lt:init-root) '(p1 p2))
+#<LT:SIMPLE-TEST {8009613F63}>
+CL-USER> (lt:eval-test test)
+#<LT:SIMPLE-TEST {8009613F63}>
+```
+
+If the test passes, it's simply returned. On failure, a CONDITION is signalled so you'll enter the debugger.
+
+The test result is set on the `TEST-OBJECT` either way. You can print it as follows:
+
+```lisp
+CL-USER> (lt:test-result test)
+```
+
+## Deleting tests
+
+It's possible to remove a single `TEST-OBJECT` or `TEST-PARENT` with `lt:remove-test`
+(which has the same signature as `lt:find-test`):
+
+```lisp
+CL-USER> (lt:remove-test 'foo (lt:init-root) '(p1 p2))
+T
+```
+
+You can clear all tests as follows:
+
+```lisp
+CL-USER> (lt:clear-tests)
+NIL
+CL-USER> (lt:print-test-tree (lt:init-root))
+* ROOT
+```
 
 ## Author and License
 
