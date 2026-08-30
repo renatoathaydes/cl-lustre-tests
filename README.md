@@ -80,7 +80,12 @@ Example test:
 > Recompiling the test replaces it just like a normal function. This allows fixing tests in the REPL by re-compiling the test
   or the implementation and immediately using the `RETRY` restart.
 
-For more realistic examples, look at Lustre-Tests' [own tests](tests/tests/).
+For more realistic examples, look at Lustre-Tests' own supporting packages tests:
+
+* [color-sexp tests](tests/color-sexp-tests/package.lisp)
+* [print-time tests](tests/time-tests/package.lisp)
+
+> The core functionality is tested with a separate, basic-test-framework, as that's more convenient than trying to self-test.
 
 ## Grouping tests
 
