@@ -57,7 +57,7 @@
                                       (test simple-test)
                                       description
                                       ctx)
-  (format stream "~A => ~A~%" (test-body test) description))
+  (format stream "~A =>~%    ~A~%" (test-body test) description))
 
 (defmethod report-result-description (stream
                                       (reporter ansi-test-reporter)
@@ -65,7 +65,7 @@
                                       description
                                       ctx)
   (lustre-tests/color-sexp:color-sexp (test-body test) stream)
-  (format stream " => ~A~%" description))
+  (format stream " =>~%    ~A~%" description))
 
 (defmethod report-result (stream (reporter counting-test-reporter) (test test-object) ctx)
   (case (test-result-status (test-result test))
@@ -108,7 +108,8 @@
       (:error
        (ansi:format-ansi stream `((:fg :red "~AERROR: " ,(car ctx))
                                   (:fg :red :st :bold "~A " ,name)))
-       (print-duration duration stream))
+       (print-duration duration stream)
+       (report-result-description stream reporter test desc ctx))
       (otherwise
        (ansi:format-ansi stream `((:fg :yellow "~A~A: " ,(car ctx) ,(test-result-status result))
                                   (:fg :yellow :st :bold "~A " ,name)))
