@@ -119,9 +119,11 @@ including the initial PARENT."
                          &optional on-start-parent on-end-parent sequencer)
   "As DOTESTS, but runs each TEST-PARENT direct children on a different Thread."
   (flet ((thread-worker (tests on-child)
-           (dolist (child tests)
-             (funcall on-child child))
-           (mapcar #'test-result tests)))
+           (let ((err (handler-case
+                          (dolist (child tests)
+                            (funcall on-child child))
+                        (error (e) e))))
+             (values (mapcar #'test-result tests) err))))
     (when on-start-parent
       (funcall on-start-parent parent))
     (multiple-value-bind (parents non-parents)
@@ -137,8 +139,11 @@ including the initial PARENT."
                                  parents))
           (dotests next-parent on-child on-start-parent on-end-parent))
         ;; wait for the children's results
-        (loop for result in (bt:join-thread thread)
-              for child in children
-              do (setf (test-result child) result))))
+        (multiple-value-bind (results err)
+            (bt:join-thread thread)
+          (loop for result in results
+                for child in children
+                do (setf (test-result child) result))
+          (when err (error err)))))
     (when on-end-parent
       (funcall on-end-parent parent))))

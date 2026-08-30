@@ -41,7 +41,7 @@ It must not create tests itself."))
            :initform "Test error."))
   (:documentation "A TEST-ERROR is a condition triggered when a test or set of tests did not run successfully.")
   (:report (lambda (condition stream)
-             (format stream "Test Error: ~A~&" (test-error-reason condition)))))
+             (format stream "~A~%" (test-error-reason condition)))))
 
 (defgeneric eval-test (test)
   (:documentation "Run a TEST-OBJECT.

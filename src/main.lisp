@@ -29,7 +29,7 @@ The body should return NIL to pass. Use an assertion macro to set up proper erro
     `(let ((,test-name (make-test-name ',name)))
        (add-test
         (make-instance 'simple-test :name ,test-name
-                                    :body '(,@body)
+                                    :body '(progn ,@body)
                                     :fun (lambda () ,@body)
                                     :pkg *package*)
         (init-root)
@@ -59,14 +59,17 @@ TEST-PARENT runs its children on a different Thread."
            (on-end-parent (p)
              (report-end stream reporter p ctx))
            (on-child (test)
-             (eval-test test)
+             (if signal-condition-on-error?
+                 (eval-test test)
+                 (handler-bind ((test-error
+                                  #'(lambda (c)
+                                      (declare (ignore c))
+                                      (invoke-restart 'continue))))
+                   (eval-test test)))
              (let ((result (test-result test)))
                (unless result
                  (error "Test ~A has no result after being run." (test-name test)))
-               (report-result stream reporter test ctx)
-               (when (and signal-condition-on-error?
-                          (not (eql :ok (test-result-status result))))
-                 (error 'test-error :reason (test-result-description result))))))
+               (report-result stream reporter test ctx))))
       (let ((iterate (if parallel? #'dotests-parallel #'dotests)))
         (funcall iterate test-parent #'on-child #'on-start-parent #'on-end-parent sequencer)))))
 

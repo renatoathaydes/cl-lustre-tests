@@ -22,15 +22,6 @@
 (defun increment-indent (ctx)
   (cons (concatenate 'string "  " (car ctx)) (cdr ctx)))
 
-(defun test-full-name (test)
-  (let ((name (test-name test)))
-    (if (typep test 'simple-test)
-        (let ((pkg (test-package test)))
-          (if pkg
-              (format nil "~A::~A" (package-name pkg) name)
-              name))
-        name)))
-
 (defmethod report-start (stream (reporter simple-test-reporter) parent ctx)
   (if (null ctx)
       (progn
@@ -100,8 +91,7 @@
   (let* ((name (test-full-name test))
          (result (test-result test))
          (duration (test-duration result))
-         (desc (test-result-description result))
-         (simple? (typep test 'simple-test)))
+         (desc (test-result-description result)))
     (case (test-result-status result)
       (:ok
        (ansi:format-ansi stream `((:fg :green "~AOK: " ,(car ctx))
