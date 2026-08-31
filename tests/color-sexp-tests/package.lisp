@@ -62,7 +62,7 @@
    (ansi-seq "("
              (:fg cs:+default-standard-macro-color+ "DEFUN")
              " "
-             (:fg cs:+default-keyword-color+ ":MY-FUN")
+             (:fg cs:+default-symbol-color+ "MY-FUN")
              " ("
              (:fg cs:+default-symbol-color+ "ARG")
              " "
@@ -88,9 +88,11 @@
              " "
              (:fg cs:+default-symbol-color+ "T")
              " "
-             (:fg cs:+default-symbol-color+ "STR")
+             (:fg cs:+default-string-color+ "\"STR\"")
              " "
-             (:fg cs:+default-symbol-color+ "ARG")
+             (:fg cs:+default-keyword-color+ ":K")
+             " "
+             (:fg cs:+default-symbol-color+ "MY-SYMBOLS:FOO")
              " ("             
              (:fg cs:+default-symbol-color+ "Y")
              " "
@@ -101,8 +103,8 @@
              (:fg cs:+default-symbol-color+ "ITEM")
              ")))))")
    (cs:color-sexp-to-string
-    '(defun :my-fun (arg &key k1)
+    '(defun my-fun (arg &key k1)
       "My function."
       (let ((x #\A))
-        (dolist (item k1) (format T "STR" arg (y 2 x item))))))))
-  
+        (dolist (item k1) (format T "STR" :k my-symbols:foo (y 2 x item)))))
+    (find-package :lustre-tests/color-sexp/tests))))

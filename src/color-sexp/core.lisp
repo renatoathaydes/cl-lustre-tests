@@ -43,7 +43,7 @@
     (T
      (or *symbol-color* +default-symbol-color+))))
 
-(defun color-sexp (sexp &optional (stream *standard-output*) action)
+(defun color-sexp (sexp &optional (stream *standard-output*) (pkg *package*) action)
   "Colorize S-expression, printing the result to STREAM."
   (ecase action
     ((:start-list nil) (princ #\( stream))
@@ -52,24 +52,26 @@
   (loop for term being the elements of sexp
         with first? = T
         do (unless first? (princ #\SPACE stream))
-        do (let ((color (typecase term
-                          (keyword (or *keyword-color* +default-keyword-color+))
-                          (symbol (color-for-symbol term))
-                          ((vector character) (or *string-color* +default-string-color+))
-                          (character (or *char-color* +default-char-color+))
-                          (number (or *number-color* +default-number-color+))
-                          (cons (color-sexp term stream :start-list))
-                          (array (color-sexp term stream :start-array))
-                          (T +default-color+))))
+        do (multiple-value-bind (color format-str)
+               (typecase term
+                 (keyword (values (or *keyword-color* +default-keyword-color+) "~S"))
+                 (symbol (values (color-for-symbol term)
+                                 (if (eq pkg (symbol-package term)) "~A" "~S")))
+                 ((vector character) (values (or *string-color* +default-string-color+) "~S"))
+                 (character (values (or *char-color* +default-char-color+) "~S"))
+                 (number (values (or *number-color* +default-number-color+) "~A"))
+                 (cons (values (color-sexp term stream pkg :start-list) ""))
+                 (array (values (color-sexp term stream pkg :start-array) ""))
+                 (T (values +default-color+ "~A")))
              (when color
-               (ansi:format-ansi stream `((:fg ,color "~S" ,term)))))
+               (ansi:format-ansi stream `((:fg ,color ,format-str ,term)))))
         do (setf first? nil))
   (ecase action
     ((:start-list nil) (princ #\) stream))
     (:start-array (princ #\] stream)))
   nil)
 
-(defun color-sexp-to-string (sexp)
+(defun color-sexp-to-string (sexp &optional (pkg *package*))
   "Colorize S-expression, returning the result as a STRING."
   (with-output-to-string (s)
-    (color-sexp sexp s)))
+    (color-sexp sexp s pkg)))
