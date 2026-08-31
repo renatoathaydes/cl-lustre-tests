@@ -57,7 +57,7 @@ TEST-PARENT runs its children on a different Thread."
     (flet ((on-start-parent (p)
              (setf ctx (report-start stream reporter p ctx)))
            (on-end-parent (p)
-             (report-end stream reporter p ctx))
+             (setf ctx (report-end stream reporter p ctx)))
            (on-child (test)
              (if signal-condition-on-error?
                  (eval-test test)

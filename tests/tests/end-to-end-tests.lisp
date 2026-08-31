@@ -1,14 +1,26 @@
 (in-package #:lustre-tests/tests)
 
+(defmacro mock-time (&body body)
+  `(let ((original-fn #'lustre-tests/time:print-time))
+     (setf (symbol-function 'lustre-tests/time:print-time)
+           (let ((count 0))
+            (lambda (time st)
+              (declare (ignore time))
+              (princ (incf count) st))))
+     (unwind-protect (progn ,@body)
+       (setf (symbol-function 'lustre-tests/time:print-time) original-fn))))
+
 (define-lustre-test report-successful-tests-correctly-by-default
   (with-local-root (root)
+    (in-package #:lustre-tests/tests) ;; fixes symbols for the test names below!
     (lt:define-test test-2+2=4 ()
       (assert (= (+ 2 2) 4)))
     (lt:define-test test-string (string-tests)
       (assert (string= (string #\A) "A")))
     (let ((result
             (with-output-to-string (stream)
-              (lt:test :stream stream :test-parent root))))
+              (mock-time
+                (lt:test :stream stream :test-parent root :parallel? nil)))))
       (lt:expect-seq
        (ansi:format-ansi
         nil
@@ -16,13 +28,13 @@
           (:st :italic "Running 2 test(s).~%")
           ("") ;; separation between format-ansi calls in impl
           (:fg :green "OK: ")
-          (:st :bold "TEST-2+2=4~%")
-          ("")
+          (:st :bold "LUSTRE-TESTS/TESTS::TEST-2+2=4 ")
+          ("(1)~%")
           (:st :bold :fg :cyan "  >> STRING-TESTS~%")
           ("")
           (:fg :green "  OK: ")
-          (:st :bold "TEST-STRING~%")
-          ("")
+          (:st :bold "LUSTRE-TESTS/TESTS::TEST-STRING ")
+          ("(2)~%")
           (:fg :green "Success: 2, ")
           (:fg :yellow "Failures: 0, ")
           (:fg :red "Errors: 0~%")))

@@ -81,7 +81,8 @@ for each TEST invocation.")
     (error "REPORT-RESULT not implemented for TEST-REPORTER.")))
 
 (defgeneric report-end (stream reporter parent ctx)
-  (:documentation "Reports that tests in the PARENT have finished running.")
+  (:documentation "Reports that tests in the PARENT have finished running.
+Returns the CTX for the next calls.")
   (:method (stream (reporter test-reporter) parent ctx)
     (error "REPORT-END not implemented for TEST-REPORTER.")))
 

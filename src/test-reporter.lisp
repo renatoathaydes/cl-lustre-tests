@@ -22,6 +22,13 @@
 (defun increment-indent (ctx)
   (cons (concatenate 'string "  " (car ctx)) (cdr ctx)))
 
+(defun decrement-indent (ctx)
+  (let* ((indent (car ctx))
+         (len (length indent)))
+    (if (zerop len)
+        ctx
+        (cons (subseq indent 0 (- len 2)) (cdr ctx)))))
+
 (defmethod report-start (stream (reporter simple-test-reporter) parent ctx)
   (if (null ctx)
       (progn
@@ -119,7 +126,11 @@
 (defmethod report-end (stream (reporter counting-test-reporter) parent ctx)
   (when (eq (cdr ctx) parent)
     (with-slots (ok-count fail-count error-count) reporter
-      (format stream "Success: ~A, Failures: ~A, Errors: ~A~%" ok-count fail-count error-count))))
+      (format stream "Success: ~A, Failures: ~A, Errors: ~A~%" ok-count fail-count error-count)))
+  ctx)
+
+(defmethod report-end (stream (reporter simple-test-reporter) parent ctx)
+  (decrement-indent (call-next-method)))
 
 (defmethod report-end (stream (reporter ansi-test-reporter) parent ctx)
   (when (eq (cdr ctx) parent)
@@ -127,4 +138,5 @@
       (ansi:format-ansi stream
                         `((:fg :green "Success: ~A, " ,ok-count)
                           (:fg :yellow "Failures: ~A, " ,fail-count)
-                          (:fg :red "Errors: ~A~%" ,error-count))))))
+                          (:fg :red "Errors: ~A~%" ,error-count)))))
+  (decrement-indent ctx))
