@@ -61,4 +61,4 @@
                 :components ((:file "package"))))
   :perform (asdf:test-op (op c)
                          ;; on-error -> :condition | :print | :exit
-                         (uiop:symbol-call :lustre-tests/runner :run-tests :on-error :print)))
+                         (uiop:symbol-call :lustre-tests/runner :run-tests :on-error :exit)))
