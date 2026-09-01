@@ -27,10 +27,12 @@ If PARENTS are given, the test location matching the names of the parents is fou
 The body should return NIL to pass. Use an assertion macro to set up proper error messages."
   (let ((test-name (gensym)))
     `(let ((,test-name (make-test-name ',name)))
+       (setf (symbol-function ,test-name)
+             (lambda () ,@body))
        (add-test
         (make-instance 'simple-test :name ,test-name
-                                    :body '(progn ,@body)
-                                    :fun (lambda () ,@body)
+                                    :body '(,@body)
+                                    :fun (symbol-function ,test-name)
                                     :pkg *package*)
         (init-root)
         (mapcar #'make-test-name ',parents)))))
