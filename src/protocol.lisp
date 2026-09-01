@@ -12,7 +12,8 @@ The DURATION should be in REAL-TIME units."))
 (defclass test-parent ()
   ((name :reader test-name :initarg :name
          :initform (error "test-parent name must be provided"))
-   (children :accessor test-children :initarg :children :initform nil))
+   (children :accessor test-children :initarg :children :initform nil)
+   (result :accessor test-result :initarg :result :initform nil))
   (:documentation "A group of tests.
 All TEST-OBJECT instances should be added to a TEST-PARENT so they can be run by the TEST function.
 Use the DEFINE-TEST or ADD-TEST forms for that purpose."))
@@ -49,6 +50,20 @@ It must not create tests itself."))
   (:documentation "A condition that can interrupt a test with a specific TEST-RESULT.")
   (:report (lambda (condition stream)
              (format stream "~A~%" (test-done-result condition)))))
+
+(defgeneric dotests (parent on-child
+                     &optional on-start-parent on-end-parent sequencer)
+  (:documentation "Iterate over a TEST-PARENT's children, calling the callbacks as appropriate.
+ON-START-PARENT and ON-END-PARENT are called for each child that is a TEST-PARENT.
+ON-CHILD is called for each non-TEST-PARENT child.
+The SEQUENCER should be used to determine the order of test iteration."))
+
+(defgeneric dotests-parallel (parent on-child
+                              &optional on-start-parent on-end-parent sequencer)
+  (:documentation "Like DOTESTS, but runs tests in parallel.
+ON-START-PARENT and ON-END-PARENT are called for each child that is a TEST-PARENT.
+ON-CHILD is called for each non-TEST-PARENT child.
+The SEQUENCER should be used to determine the order of test iteration."))
 
 (defgeneric eval-test (test)
   (:documentation "Run a TEST-OBJECT.
