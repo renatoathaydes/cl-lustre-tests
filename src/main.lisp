@@ -53,10 +53,20 @@ If SIGNAL-CONDITION-ON-ERROR? is NIL, test evaluation proceeds as normal,
 otherwise a TEST-ERROR condition is signalled on each test failure or error.
 If PARALLEL? is NIL, tests run on the caller Thread, otherwise each
 TEST-PARENT runs its children on a different Thread."
-  (let ((ctx nil))
+  (let ((ctx nil)
+        (start-times nil)
+        (results nil))
     (flet ((on-start-parent (p)
+             (push (get-internal-real-time) start-times)
+             (push (list T) results)
              (setf ctx (report-start stream reporter p ctx)))
            (on-end-parent (p)
+             (let ((time (- (get-internal-real-time) (pop start-times)))
+                   (result (pop results)))
+               (setf (test-result p)
+                     (make-instance 'test-result
+                                    :status (if (car result) :ok :failed)
+                                    :duration time)))
              (setf ctx (report-end stream reporter p ctx)))
            (on-child (test)
              (if signal-condition-on-error?
@@ -69,6 +79,9 @@ TEST-PARENT runs its children on a different Thread."
              (let ((result (test-result test)))
                (unless result
                  (error "Test ~A has no result after being run." (test-name test)))
+               (unless (test-passed? test)
+                 (let ((this-result (car results)))
+                   (setf (car this-result) nil)))
                (report-result stream reporter test ctx))))
       (let ((iterate (if parallel? #'dotests-parallel #'dotests)))
         (funcall iterate test-parent #'on-child #'on-start-parent #'on-end-parent sequencer)))))

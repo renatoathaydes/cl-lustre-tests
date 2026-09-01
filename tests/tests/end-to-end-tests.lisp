@@ -22,20 +22,26 @@
               (mock-time
                 (lt:test :stream stream :test-parent root :parallel? nil)))))
       (lt:expect-seq
-       (ansi:format-ansi
-        nil
-        `(("== LUSTRE TESTS ==~%")
-          (:st :italic "Running 2 test(s).~%")
-          ("") ;; separation between format-ansi calls in impl
-          (:fg :green "OK: ")
-          (:st :bold "LUSTRE-TESTS/TESTS::TEST-2+2=4 ")
-          ("(1)~%")
-          (:st :bold :fg :cyan "  >> STRING-TESTS~%")
-          ("")
-          (:fg :green "  OK: ")
-          (:st :bold "LUSTRE-TESTS/TESTS::TEST-STRING ")
-          ("(2)~%")
-          (:fg :green "Success: 2, ")
-          (:fg :yellow "Failures: 0, ")
-          (:fg :red "Errors: 0~%")))
+       (concatenate
+        'string
+        (ansi:format-ansi
+         nil
+         `(("== LUSTRE TESTS ==~%")
+           (:st :italic "Running 2 test(s).~%")
+           ("") ;; separation between format-ansi calls in impl
+           (:fg :green "OK: ")
+           (:st :bold "LUSTRE-TESTS/TESTS::TEST-2+2=4 ")
+           ("(1)~%")
+           (:st :bold :fg :cyan "  >> STRING-TESTS~%")
+           ("")
+           (:fg :green "  OK: ")
+           (:st :bold "LUSTRE-TESTS/TESTS::TEST-STRING ")
+           ("(2)~%")
+           ("  ")
+           (:st :bold :fg :cyan "<< STRING-TESTS ")
+           ("(3)~%")
+           (:fg :green "Success: 2, ")
+           (:fg :yellow "Failures: 0, ")
+           (:fg :red "Errors: 0 ")))
+        (format nil "(4)~%"))
        result))))

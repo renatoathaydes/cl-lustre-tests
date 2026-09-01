@@ -71,6 +71,12 @@ Return the TEST-OBJECT with its TEST-RESULT having been set.")
   (:method ((test test-object))
     (error "EVAL-TEST not implemented for TEST-OBJECT.")))
 
+(defgeneric test-passed? (test)
+  (:documentation "Whether a test passed.
+A test normally passed if its TEST-RESULT-STATUS is set to :OK.")
+  (:method ((test test-result)) (eq :OK (test-result-status test)))
+  (:method ((test test-object)) (test-passed? (test-result test))))
+
 (defgeneric sequence-tests (sequencer tests)
   (:documentation "Returns a LIST of tests to run based on the given TESTS.")
   (:method ((sequencer test-sequencer) tests)

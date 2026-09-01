@@ -91,15 +91,16 @@ Does not include any TEST-PARENT instances in the result."
           else collect child into others
         finally (return (values parents others))))
 
+(defmethod test-passed? ((parent test-parent))
+  (flet ((on-child (child)
+           (unless (test-passed? child)
+             (return-from test-passed? nil))))
+    (dotests parent #'on-child)
+    ;; no early return, so all tests passed
+    T))
+
 (defmethod dotests ((parent test-parent) on-child
                     &optional on-start-parent on-end-parent sequencer)
-  "Iterate over each child in PARENT.
-Children may be either a TEST-OBJECT or a TEST-PARENT.
-First, the TEST-OBJECTs are iterated over. If there's any TEST-PARENT,
-they are then iterated over, recursively.
-ON-CHILD is called for each TEST-OBJECT.
-ON-START-PARENT and ON-END-PARENT are called before/after each TEST-PARENT,
-including the initial PARENT."
   (when on-start-parent
     (funcall on-start-parent parent))
   (multiple-value-bind (parents non-parents)
@@ -117,7 +118,6 @@ including the initial PARENT."
 
 (defmethod dotests-parallel ((parent test-parent) on-child
                              &optional on-start-parent on-end-parent sequencer)
-  "As DOTESTS, but runs each TEST-PARENT direct children on a different Thread."
   (flet ((thread-worker (tests on-child)
            (let ((err (handler-case
                           (dolist (child tests)

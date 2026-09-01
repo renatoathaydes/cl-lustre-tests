@@ -21,7 +21,9 @@
            #:print-test-tree
            #:count-tests
            #:dotests
+           #:dotests-parallel
            #:eval-test
+           #:test-passed?
            #:sequence-tests
            #:sequence-parents
            #:report-start
@@ -45,6 +47,7 @@
            #:expect-seq
            ;; test-result slots
            #:test-result-status
+           #:test-duration
            ;; simple-test-result slots
            #:test-result-description
            ;; test-parent slots

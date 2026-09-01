@@ -29,7 +29,7 @@
         ctx
         (cons (subseq indent 0 (- len 2)) (cdr ctx)))))
 
-(defmethod report-start (stream (reporter simple-test-reporter) parent ctx)
+(defmethod report-start (stream (reporter simple-test-reporter) (parent test-parent) ctx)
   (if (null ctx)
       (progn
         (format stream "== LUSTRE TESTS ==~%~%Running ~A test(s).~%" (count-tests parent))
@@ -38,7 +38,7 @@
         (format stream "  ~A>> ~A~%" (car ctx) (test-full-name parent))
         (increment-indent ctx))))
 
-(defmethod report-start (stream (reporter ansi-test-reporter) parent ctx)
+(defmethod report-start (stream (reporter ansi-test-reporter) (parent test-parent) ctx)
   (if (null ctx)
       (progn
         (ansi:format-ansi
@@ -123,20 +123,31 @@
        (print-duration duration stream)
        (report-result-description stream reporter test desc ctx)))))
 
-(defmethod report-end (stream (reporter counting-test-reporter) parent ctx)
-  (when (eq (cdr ctx) parent)
-    (with-slots (ok-count fail-count error-count) reporter
-      (format stream "Success: ~A, Failures: ~A, Errors: ~A~%" ok-count fail-count error-count)))
+(defmethod report-end (stream (reporter counting-test-reporter) (parent test-parent) ctx)
+  (cond
+    ((eq (cdr ctx) parent)
+     (with-slots (ok-count fail-count error-count) reporter
+       (format stream "Success: ~A, Failures: ~A, Errors: ~A " ok-count fail-count error-count))
+     (print-duration (test-duration (test-result parent)) stream))
+    (T
+     (format stream "~A<< ~A " (car ctx) (test-name parent))
+     (print-duration (test-duration (test-result parent)) stream)))
   ctx)
 
-(defmethod report-end (stream (reporter simple-test-reporter) parent ctx)
+(defmethod report-end (stream (reporter simple-test-reporter) (parent test-parent) ctx)
   (decrement-indent (call-next-method)))
 
-(defmethod report-end (stream (reporter ansi-test-reporter) parent ctx)
-  (when (eq (cdr ctx) parent)
-    (with-slots (ok-count fail-count error-count) reporter
-      (ansi:format-ansi stream
-                        `((:fg :green "Success: ~A, " ,ok-count)
-                          (:fg :yellow "Failures: ~A, " ,fail-count)
-                          (:fg :red "Errors: ~A~%" ,error-count)))))
+(defmethod report-end (stream (reporter ansi-test-reporter) (parent test-parent) ctx)
+  (cond
+    ((eq (cdr ctx) parent)
+     (with-slots (ok-count fail-count error-count) reporter
+       (ansi:format-ansi stream
+                         `((:fg :green "Success: ~A, " ,ok-count)
+                           (:fg :yellow "Failures: ~A, " ,fail-count)
+                           (:fg :red "Errors: ~A " ,error-count))))
+     (print-duration (test-duration (test-result parent)) stream))
+    (T
+     (ansi:format-ansi stream `(("~A" ,(car ctx))
+                                (:st :bold :fg :cyan "<< ~A " ,(test-name parent))))
+     (print-duration (test-duration (test-result parent)) stream)))
   (decrement-indent ctx))
