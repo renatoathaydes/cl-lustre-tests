@@ -137,7 +137,7 @@ Does not include any TEST-PARENT instances in the result."
         (dolist (next-parent (if sequencer
                                  (sequence-parents sequencer parents)
                                  parents))
-          (dotests next-parent on-child on-start-parent on-end-parent))
+          (dotests-parallel next-parent on-child on-start-parent on-end-parent))
         ;; wait for the children's results
         (multiple-value-bind (results err)
             (bt:join-thread thread)
