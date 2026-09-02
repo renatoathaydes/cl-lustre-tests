@@ -1,9 +1,11 @@
 (in-package #:lustre-tests)
 
+(defconstant +gray+ 8)
+
 (defclass counting-test-reporter (test-reporter)
   ((ok-count :initform 0)
-   (fail-count :initform 0)
-   (error-count :initform 0))
+   (ignored-count :initform 0)
+   (fail-count :initform 0))
   (:documentation "An abstract test report writer that counts each test-result status."))
 
 (defclass simple-test-reporter (counting-test-reporter)
@@ -75,9 +77,9 @@
   (format stream " =>~%    ~A~%" description))
 
 (defmethod report-result (stream (reporter counting-test-reporter) (test test-object) ctx)
-  (case (test-result-status (test-result test))
-    (:ok (incf (slot-value reporter 'ok-count)))
-    (:error (incf (slot-value reporter 'error-count)))
+  (cond
+    ((test-passed? test) (incf (slot-value reporter 'ok-count)))
+    ((test-ignored? test) (incf (slot-value reporter 'ignored-count)))
     (otherwise (incf (slot-value reporter 'fail-count)))))
 
 (defun print-duration (duration stream)
@@ -90,10 +92,12 @@
   (call-next-method)
   (let* ((result (test-result test))
          (duration (test-duration result)))
-    (case (test-result-status result)
-      (:ok
+    (cond
+      ((test-passed? result)
        (format stream "~AOK: ~A " (car ctx) (test-full-name test))
        (print-duration duration stream))
+      ((test-ignored? result)
+       (format stream "~AIGNORED: ~A~%" (car ctx) (test-full-name test)))
       (otherwise (let ((desc (test-result-description result)))
                    (format stream "~A~A: ~A~%"
                            (car ctx)
@@ -107,27 +111,25 @@
          (result (test-result test))
          (duration (test-duration result))
          (desc (test-result-description result)))
-    (case (test-result-status result)
-      (:ok
+    (cond
+      ((test-passed? result)
        (ansi:format-ansi stream `((:fg :green "~AOK: " ,(car ctx))
                                   (:st :bold "~A " ,name)))
        (print-duration duration stream))
-      (:error
-       (ansi:format-ansi stream `((:fg :red "~AERROR: " ,(car ctx))
-                                  (:fg :red :st :bold "~A " ,name)))
-       (print-duration duration stream)
-       (report-result-description stream reporter test desc ctx))
+      ((test-ignored? result)
+       (ansi:format-ansi stream `((:fg ,+gray+ "~AIGNORED: " ,(car ctx))
+                                  (:st :bold "~A~%" ,name))))
       (otherwise
-       (ansi:format-ansi stream `((:fg :yellow "~A~A: " ,(car ctx) ,(test-result-status result))
-                                  (:fg :yellow :st :bold "~A " ,name)))
+       (ansi:format-ansi stream `((:fg :red "~A~A: " ,(car ctx) ,(test-result-status result))
+                                  (:fg :red :st :bold "~A " ,name)))
        (print-duration duration stream)
        (report-result-description stream reporter test desc ctx)))))
 
 (defmethod report-end (stream (reporter counting-test-reporter) (parent test-parent) ctx)
   (cond
     ((eq (cdr ctx) parent)
-     (with-slots (ok-count fail-count error-count) reporter
-       (format stream "Success: ~A, Failures: ~A, Errors: ~A " ok-count fail-count error-count))
+     (with-slots (ok-count ignored-count fail-count) reporter
+       (format stream "Success: ~A, Ignored: ~A, Failures: ~A " ok-count ignored-count fail-count))
      (print-duration (test-duration (test-result parent)) stream))
     (T
      (format stream "~A<< ~A " (car ctx) (test-name parent))
@@ -140,11 +142,11 @@
 (defmethod report-end (stream (reporter ansi-test-reporter) (parent test-parent) ctx)
   (cond
     ((eq (cdr ctx) parent)
-     (with-slots (ok-count fail-count error-count) reporter
+     (with-slots (ok-count ignored-count fail-count) reporter
        (ansi:format-ansi stream
                          `((:fg :green "Success: ~A, " ,ok-count)
-                           (:fg :yellow "Failures: ~A, " ,fail-count)
-                           (:fg :red "Errors: ~A " ,error-count))))
+                           (:fg ,+gray+ "Ignored: ~A, " ,ignored-count)
+                           (:fg :red "Failures: ~A " ,fail-count))))
      (print-duration (test-duration (test-result parent)) stream))
     (T
      (ansi:format-ansi stream `(("~A" ,(car ctx))

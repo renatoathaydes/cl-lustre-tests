@@ -9,6 +9,7 @@
            #:clear-tests
            #:test-simple
            #:define-test
+           #:define-test!
            #:make-test-name
            #:test-object
            #:test-result

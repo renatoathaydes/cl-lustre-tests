@@ -21,21 +21,42 @@
     (number (intern (format nil "~D" name)))
     (otherwise (error "Name must be string | symbol | number."))))
 
-(defmacro define-test (name (&rest parents) &body body)
-  "Add a test to the framework.
+(defmacro define-test! (name (&rest parents) (class-name &rest keys &key &allow-other-keys) &body body)
+  "Add a test of type CLASS-NAME to the framework.
 If PARENTS are given, the test location matching the names of the parents is found or created.
-The body should return NIL to pass. Use an assertion macro to set up proper error messages."
-  (let ((test-name (gensym)))
-    `(let ((,test-name (make-test-name ',name)))
-       (setf (symbol-function ,test-name)
-             (lambda () ,@body))
-       (add-test
-        (make-instance 'simple-test :name ,test-name
-                                    :body '(,@body)
-                                    :fun (symbol-function ,test-name)
-                                    :pkg *package*)
-        (init-root)
-        (mapcar #'make-test-name ',parents)))))
+A test passes if it does not signal any conditions. Hence, it's common to use ASSERT and similar
+forms in tests.
+The test class must have at least the following initargs (normally inherited from SIMPLE-TEST):
+  - :NAME name of the test
+  - :BODY the body of the test (for error reporting)
+  - :FUN the function that runs the test
+  - :PKG the package the test is defined at
+Returns the created TEST."
+  (let ((test-name (gensym))
+        (test (gensym))
+        (fun (gensym)))
+    `(let* ((,test-name (make-test-name ',name))
+            (,fun (setf (symbol-function ,test-name) (lambda () ,@body)))
+            (,test (funcall #'make-instance
+                            ,class-name
+                            :name ,test-name
+                            :body '(,@body)
+                            :fun ,fun
+                            :pkg *package*
+                            ,@keys)))
+       (add-test ,test
+                 (init-root)
+                 (mapcar #'make-test-name ',parents))
+       ,test)))
+
+(defmacro define-test (name (&rest parents) &body body)
+  "Add a test of type SIMPLE-TEST to the framework.
+If PARENTS are given, the test location matching the names of the parents is found or created.
+A test passes if it does not signal any conditions. Hence, it's common to use ASSERT and similar
+forms in tests.
+Use DEFINE-TEST! for more custom options.
+Returns the created TEST."
+  `(define-test! ,name (,@parents) ('simple-test) ,@body))
 
 (defun test (&key
                (test-parent (init-root))

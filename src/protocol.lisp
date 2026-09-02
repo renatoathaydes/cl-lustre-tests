@@ -6,7 +6,11 @@
    (description :reader test-result-description :initarg :description :initform nil))
   (:documentation "The result of running a test.
 It should be pretty-printable so it can be shown in test reports.
-The STATUS should be :OK, :FAILED or :ERROR.
+By default, the recognized STATUS are :OK and :IGNORED (checked by methods
+TEST-PASSED? and TEST-IGNORED?, respectively).
+Anything else is considered as a failure.
+Adding custom status requires specializing EVAL-TEST (to produce custom status)
+and optionally TEST-REPORTER (to report such status differently than as failures).
 The DURATION should be in REAL-TIME units."))
 
 (defclass test-parent ()
@@ -23,8 +27,8 @@ Use the DEFINE-TEST or ADD-TEST forms for that purpose."))
          :initform (error "test-object name must be provided"))
    (result :accessor test-result :initarg :result
            :initform nil)
-   (enabled :accessor :test-enabled? :initarg :enabled :initform T))
-  (:documentation "A test object. Usually created by the define-test macro.
+   (enabled :accessor test-enabled? :initarg :enabled :initform T))
+  (:documentation "A test object. Usually created by the DEFINE-TEST macro.
 Tests can be evaluated individually by EVAL-TEST. After the test runs,
 it should have a non-null RESULT which is a TEST-RESULT.
 To execute all tests, invoke TEST."))
@@ -76,6 +80,11 @@ Return the TEST-OBJECT with its TEST-RESULT having been set.")
 A test normally passed if its TEST-RESULT-STATUS is set to :OK.")
   (:method ((test test-result)) (eq :OK (test-result-status test)))
   (:method ((test test-object)) (test-passed? (test-result test))))
+
+(defgeneric test-ignored? (test)
+  (:documentation "Whether a test was ignored (because it was disabled).")
+  (:method ((test test-result)) (eq :IGNORED (test-result-status test)))
+  (:method ((test test-object)) (test-ignored? (test-result test))))
 
 (defgeneric sequence-tests (sequencer tests)
   (:documentation "Returns a LIST of tests to run based on the given TESTS.")

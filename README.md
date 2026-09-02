@@ -74,9 +74,12 @@ Hence, one should always use assertions in tests such as:
 
 More information about `expect-seq` in the [Assertions](#assertions) section below.
 
-Example test:
+Example tests:
 
 ```lisp
+(lt:define-test "2 + 2 should eq 4" ()
+    (assert (= (+ 2 2) 4)))
+
 (lt:define-test mapcar+1-works ()
     (lt:expect-seq '(2 3 4) (mapcar #'1+ '(1 2 3))))
 ```
@@ -89,7 +92,7 @@ For more realistic examples, look at Lustre-Tests' own supporting packages tests
 * [color-sexp tests](tests/color-sexp-tests/package.lisp)
 * [print-time tests](tests/time-tests/package.lisp)
 
-> The core functionality is tested with a separate, basic-test-framework, as that's more convenient than trying to self-test.
+> The core functionality of this library is tested with a separate, basic-test-framework, as that's more convenient than trying to self-test.
 
 ## Grouping tests
 
@@ -119,6 +122,9 @@ Which, for the example above, prints:
 
 Besides being useful for test organization, using test parents also enables parallelization:
 calling the `test` functions with `:parallel T` causes each TEST-PARENT to run its children on a separate Thread.
+
+> Warning: when using this option, use a TEST-REPORTER that can handle multi-threading.
+  The default implementations may print overlapping results as they do not synchronize.
 
 <div id="assertions" />
 
@@ -228,7 +234,7 @@ CL-USER> (lt:find-test 'foo *)
 
 ## Running tests
 
-As explained in the previous section, you can run all children of a test parent with one of the `test` functions.
+The previous sections already showed you can run all children of a test parent with one of the `test` functions:
 
 ```lisp
 CL-USER> (defparameter p (lt:find-test 'p1 (lt:init-root)))
@@ -243,11 +249,16 @@ so to run all tests, just omit it:
 CL-USER> (lt:test)
 ```
 
-To run just a single `TEST-OBJECT` (usually of type `SIMPLE-TEST`) you need to use the `lt:eval-test` method:
+To run a single `TEST-OBJECT` (usually of type `SIMPLE-TEST`), just run the function with the name of the test.
+
+> `lt:define-test` creates a test with the given name, but also a function with the same name. Hence, running the test
+  is as easy as running a function.
+
+If you want the `test-result` to be set, then you need to use the `lt:eval-test` method:
 
 ```lisp
-CL-USER> (lt:find-test 'foo (lt:init-root) '(p1 p2))
-#<LT:SIMPLE-TEST {8009613F63}>
+CL-USER> (setvar test (lt:find-test 'foo (lt:init-root) '(p1 p2)))
+TEST
 CL-USER> (lt:eval-test test)
 #<LT:SIMPLE-TEST {8009613F63}>
 ```
@@ -273,6 +284,7 @@ appropriate defaults for that:
 The `lt:test-simple` function is better for the REPL. The differences from `lt:test` are:
 
 * it uses `simple-test-reporter` (no ANSI colors).
+* conditions are signalled on test failures, allowing fixing or skipping them live.
 * tests are not run in parallel.
 
 ## Deleting tests
