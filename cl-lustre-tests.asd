@@ -55,6 +55,7 @@
                              (:file "parent-tests" :depends-on ("package"))
                              (:file "sequencer-tests" :depends-on ("package"))
                              (:file "expect-seq-tests" :depends-on ("package"))
+                             (:file "eval-test-tests" :depends-on ("package"))
                              (:file "end-to-end-tests" :depends-on ("package"))))
                (:module "runner"
                 :depends-on ("tests")
