@@ -1,15 +1,5 @@
 (in-package #:lustre-tests/tests)
 
-(defmacro mock-time (&body body)
-  `(let ((original-fn #'lustre-tests/time:print-time))
-     (setf (symbol-function 'lustre-tests/time:print-time)
-           (let ((count 0))
-            (lambda (time st)
-              (declare (ignore time))
-              (princ (incf count) st))))
-     (unwind-protect (progn ,@body)
-       (setf (symbol-function 'lustre-tests/time:print-time) original-fn))))
-
 (define-lustre-test report-successful-tests-correctly-simple
   (with-local-root (root)
     (in-package #:lustre-tests/tests) ;; fixes symbols for the test names below!
@@ -19,7 +9,7 @@
       (assert (string= (string #\A) "A")))
     (let ((result
             (with-output-to-string (stream)
-              (mock-time
+              (mocking-print-time
                 (lt:test-simple :stream stream :test-parent root :parallel? nil)))))
       (lt:expect-seq "== LUSTRE TESTS ==
 Running 2 test(s).
@@ -40,7 +30,7 @@ Success: 2, Ignored: 0, Failures: 0 (4)
       (assert (string= (string #\A) "A")))
     (let ((result
             (with-output-to-string (stream)
-              (mock-time
+              (mocking-print-time
                 (lt:test :stream stream :test-parent root :parallel? nil)))))
       (lt:expect-seq
        (concatenate

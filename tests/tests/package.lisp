@@ -4,4 +4,3 @@
         #:lustre-tests/basic-framework)
   (:local-nicknames
    (#:lt #:lustre-tests)))
-
