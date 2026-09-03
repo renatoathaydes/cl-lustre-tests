@@ -40,6 +40,7 @@
 
 (define-lustre-test define-test!-custom-class
   (with-local-root (root)
+    (declare (ignore root))
     (let ((test (lt:define-test! great-test () ('custom-test :great T) T)))
       (assert (typep test 'custom-test))
       (assert-t (test-great? test)))))
