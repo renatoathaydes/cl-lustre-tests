@@ -70,6 +70,13 @@ The MODE can be one of:
 
 (defmethod report-result-description (stream
                                       (reporter base-test-reporter)
+                                      (test test-object)
+                                      description
+                                      ctx)
+  (format stream "=> ~A~%" description))
+
+(defmethod report-result-description (stream
+                                      (reporter base-test-reporter)
                                       (test simple-test)
                                       description
                                       ctx)
@@ -108,11 +115,12 @@ The MODE can be one of:
        (when (eq (test-reporter-mode reporter) :full)
          (format stream "~AIGNORED: ~A~%" (car ctx) (test-full-name test))))
       (T (let ((desc (test-result-description result)))
-                   (format stream "~A~A: ~A~%"
-                           (car ctx)
-                           (test-result-status result)
-                           (test-full-name test))
-                   (report-result-description stream reporter test desc ctx))))))
+           (format stream "~A~A: ~A "
+                   (car ctx)
+                   (test-result-status result)
+                   (test-full-name test))
+           (print-duration duration stream)
+           (report-result-description stream reporter test desc ctx))))))
 
 (defmethod report-result (stream (reporter ansi-test-reporter) (test test-object) ctx)
   (call-next-method)
