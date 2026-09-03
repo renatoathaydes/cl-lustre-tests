@@ -34,7 +34,7 @@
            #:simple-test-result
            #:simple-test
            #:simple-test-sequencer
-           #:counting-test-reporter
+           #:base-test-reporter
            #:simple-test-reporter
            #:ansi-test-reporter
            ;; conditions
@@ -57,6 +57,8 @@
            #:test-name
            #:test-package
            #:test-enabled?
+           ;; base-test-reporter slots
+           #:test-reporter-mode
            ;; ansi-test-reporter slots
            #:ansi-enabled?
            ;; simple-test-sequencer slots
