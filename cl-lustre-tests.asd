@@ -54,7 +54,7 @@
                              (:file "define-test-tests" :depends-on ("package"))
                              (:file "parent-tests" :depends-on ("package"))
                              (:file "sequencer-tests" :depends-on ("package"))
-                             (:file "reporter-tests" :depends-on ("package"))
+                             (:file "simple-test-reporter-tests" :depends-on ("package"))
                              (:file "expect-seq-tests" :depends-on ("package"))
                              (:file "eval-test-tests" :depends-on ("package"))
                              (:file "end-to-end-tests" :depends-on ("package"))))
