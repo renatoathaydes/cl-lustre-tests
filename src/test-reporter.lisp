@@ -70,25 +70,28 @@ The MODE can be one of:
 
 (defmethod report-result-description (stream
                                       (reporter base-test-reporter)
+                                      indent
                                       (test test-object)
                                       description
                                       ctx)
-  (format stream "=> ~A~%" description))
+  (format stream "~A=> ~A~%" indent description))
 
 (defmethod report-result-description (stream
                                       (reporter base-test-reporter)
+                                      indent
                                       (test simple-test)
                                       description
                                       ctx)
-  (format stream "~A =>~%    ~A~%" (test-body test) description))
+  (format stream "~A~A =>~%~A  ~A~%" indent (test-body test) indent description))
 
 (defmethod report-result-description (stream
                                       (reporter ansi-test-reporter)
+                                      indent
                                       (test simple-test)
                                       description
                                       ctx)
   (lustre-tests/color-sexp:color-sexp (test-body test) stream)
-  (format stream " =>~%    ~A~%" description))
+  (format stream " =>~%~A  ~A~%" indent description))
 
 (defmethod report-result (stream (reporter base-test-reporter) (test test-object) ctx)
   (cond
@@ -105,44 +108,46 @@ The MODE can be one of:
 (defmethod report-result (stream (reporter simple-test-reporter) (test test-object) ctx)
   (call-next-method)
   (let* ((result (test-result test))
-         (duration (test-duration result)))
+         (duration (test-duration result))
+         (indent (car ctx)))
     (cond
       ((test-passed? result)
        (when (eq (test-reporter-mode reporter) :full)
-         (format stream "~AOK: ~A " (car ctx) (test-full-name test))
+         (format stream "~AOK: ~A " indent (test-full-name test))
          (print-duration duration stream)))
       ((test-ignored? result)
        (when (eq (test-reporter-mode reporter) :full)
-         (format stream "~AIGNORED: ~A~%" (car ctx) (test-full-name test))))
+         (format stream "~AIGNORED: ~A~%" indent (test-full-name test))))
       (T (let ((desc (test-result-description result)))
            (format stream "~A~A: ~A "
-                   (car ctx)
+                   indent
                    (test-result-status result)
                    (test-full-name test))
            (print-duration duration stream)
-           (report-result-description stream reporter test desc ctx))))))
+           (report-result-description stream reporter indent test desc ctx))))))
 
 (defmethod report-result (stream (reporter ansi-test-reporter) (test test-object) ctx)
   (call-next-method)
   (let* ((name (test-full-name test))
          (result (test-result test))
          (duration (test-duration result))
+         (indent (car ctx))
          (desc (test-result-description result)))
     (cond
       ((test-passed? result)
        (when (eq (test-reporter-mode reporter) :full)
-         (ansi:format-ansi stream `((:fg :green "~AOK: " ,(car ctx))
+         (ansi:format-ansi stream `((:fg :green "~AOK: " ,indent)
                                     (:st :bold "~A " ,name)))
          (print-duration duration stream)))
       ((test-ignored? result)
        (when (eq (test-reporter-mode reporter) :full)
-         (ansi:format-ansi stream `((:fg ,+gray+ "~AIGNORED: " ,(car ctx))
+         (ansi:format-ansi stream `((:fg ,+gray+ "~AIGNORED: " ,indent)
                                     (:st :bold "~A~%" ,name)))))
       (T
-       (ansi:format-ansi stream `((:fg :red "~A~A: " ,(car ctx) ,(test-result-status result))
+       (ansi:format-ansi stream `((:fg :red "~A~A: " ,indent ,(test-result-status result))
                                   (:fg :red :st :bold "~A " ,name)))
        (print-duration duration stream)
-       (report-result-description stream reporter test desc ctx)))))
+       (report-result-description stream reporter indent test desc ctx)))))
 
 (defmethod report-end (stream (reporter base-test-reporter) (parent test-parent) ctx)
   (cond

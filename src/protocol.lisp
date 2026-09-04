@@ -116,12 +116,12 @@ Returns the CTX for the next calls.")
   (:method (stream (reporter test-reporter) parent ctx)
     (error "REPORT-END not implemented for TEST-REPORTER.")))
 
-(defgeneric report-result-description (stream reporter test description ctx)
+(defgeneric report-result-description (stream reporter indent test description ctx)
   (:documentation "Reports the TEST-RESULT-DESCRIPTION for a TEST-OBJECT.
 This method allows describing precisely why a test failed.
 Unlike the other TEST-REPORTER methods, this method is not called directly by the
 TEST function. Most implementations of REPORT-RESULT are expected to call it so
 that it's possible to customize the result description without having to create a
 full reporter type.")
-  (:method (stream (reporter test-reporter) (test test-object) description ctx)
+  (:method (stream (reporter test-reporter) indent (test test-object) description ctx)
     (error "REPORT-RESULT-DESCRIPTION not implemented for TEST-REPORTER.")))
