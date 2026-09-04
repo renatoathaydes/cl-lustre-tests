@@ -1,19 +1,11 @@
 (defpackage lustre-tests/color-sexp/tests
   (:documentation "lustre-tests/color-sexp tests.")
-  (:use #:cl)
+  (:use #:cl #:lustre-tests/test-helpers)
   (:local-nicknames
    (#:lt #:lustre-tests)
    (#:cs #:lustre-tests/color-sexp)))
 
 (in-package #:lustre-tests/color-sexp/tests)
-
-(defmacro ansi-seq (&rest body)
-  (let ((transformed-body
-          (loop for exp in body
-                collect (etypecase exp
-                          ((or string character) `(format out "~A" ,exp))
-                          (list `(ansi:format-ansi out (list (list ,@exp))))))))
-    `(with-output-to-string (out) ,@transformed-body)))
 
 (defpackage my-symbols
   (:export #:foo))

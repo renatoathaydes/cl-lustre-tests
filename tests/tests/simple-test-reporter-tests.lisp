@@ -1,20 +1,11 @@
 (in-package #:lustre-tests/tests)
 
-(defun make-test-with-error (name error)
-  (make-instance 'lt:test-object
-                 :name name
-                 :result (make-instance 'lt:test-result
-                                        :status :error
-                                        :description error)))
-
 (define-lustre-test simple-test-reporter-prints-test-ok
   (let* ((reporter (make-instance 'lt:simple-test-reporter))
          (parent (make-instance 'lt:test-parent
                                 :name "P"
                                 :result (make-instance 'lt:test-result)))
-         (child (make-instance 'lt:test-object
-                               :name "C"
-                               :result (make-instance 'lt:test-result))))
+         (child (make-test-ok "C")))
     (lt::add-child child parent)
     (lt:expect-seq "== LUSTRE TESTS ==
 Running 1 test(s).
@@ -55,18 +46,10 @@ Success: 0, Ignored: 0, Failures: 1 (2)
          (parent-3 (make-instance 'lt:test-parent
                                   :name "P3"
                                   :result (make-instance 'lt:test-result)))
-         (child-1 (make-instance 'lt:test-object
-                                 :name "C1"
-                                 :result (make-instance 'lt:test-result)))
-         (child-2 (make-instance 'lt:test-object
-                                 :name "C2"
-                                 :result (make-instance 'lt:test-result)))
-         (child-3 (make-instance 'lt:test-object
-                                 :name "C3"
-                                 :result (make-instance 'lt:test-result)))
-         (child-4 (make-instance 'lt:test-object
-                                 :name "C4"
-                                 :result (make-instance 'lt:test-result))))
+         (child-1 (make-test-ok "C1"))
+         (child-2 (make-test-ok "C2"))
+         (child-3 (make-test-ok "C3"))
+         (child-4 (make-test-ok "C4")))
     (lt::add-child parent-2 parent-1)
     (lt::add-child parent-3 parent-2)
     (lt::add-child child-1 parent-1)
@@ -109,13 +92,9 @@ Success: 4, Ignored: 0, Failures: 0 (7)
                                   :name "P3"
                                   :result (make-instance 'lt:test-result)))
          (child-1 (make-test-with-error "C1" "c1 failed"))
-         (child-2 (make-instance 'lt:test-object
-                                 :name "C2"
-                                 :result (make-instance 'lt:test-result)))
+         (child-2 (make-test-ok "C2"))
          (child-3 (make-test-with-error "C3" "c3 failed"))
-         (child-4 (make-instance 'lt:test-object
-                                 :name "C4"
-                                 :result (make-instance 'lt:test-result))))
+         (child-4 (make-test-ok "C4")))
     (lt::add-child parent-2 parent-1)
     (lt::add-child parent-3 parent-2)
     (lt::add-child child-1 parent-1)

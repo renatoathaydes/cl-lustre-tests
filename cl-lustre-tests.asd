@@ -42,19 +42,23 @@
   :version     "0.1.0"
   :depends-on  ("format-ansi" "cl-lustre-tests")
   :pathname "tests"
-  :components ((:module "basic-test-framework"
+  :components ((:module "test-helpers"
+                :components ((:file "package")))
+               (:module "basic-test-framework"
                 :components ((:file "package")))
                (:module "color-sexp-tests"
+                :depends-on ("test-helpers")
                 :components ((:file "package")))
                (:module "time-tests"
                 :components ((:file "package")))
                (:module "tests"
-                :depends-on ("basic-test-framework")
+                :depends-on ("basic-test-framework" "test-helpers")
                 :components ((:file "package")
                              (:file "define-test-tests" :depends-on ("package"))
                              (:file "parent-tests" :depends-on ("package"))
                              (:file "sequencer-tests" :depends-on ("package"))
                              (:file "simple-test-reporter-tests" :depends-on ("package"))
+                             (:file "ansi-test-reporter-tests" :depends-on ("package"))
                              (:file "expect-seq-tests" :depends-on ("package"))
                              (:file "eval-test-tests" :depends-on ("package"))
                              (:file "end-to-end-tests" :depends-on ("package"))))
