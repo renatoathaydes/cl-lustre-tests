@@ -22,11 +22,21 @@
                                         :description error)))
 
 (defmacro ansi-seq (&rest body)
-  (let ((transformed-body
-          (loop for exp in body
-                collect (etypecase exp
-                          ((or string character) `(format out "~A" ,exp))
-                          (list (if (listp (car exp))
-                                    `(ansi:format-ansi out (list ,@exp))
-                                    `(ansi:format-ansi out (list (list ,@exp)))))))))
-    `(with-output-to-string (out) ,@transformed-body)))
+  (flet ((ensure-list (item)
+           (typecase item
+             (list
+              (if (eq 'cl:list (car item))
+                  item
+                  (cons 'list item)))
+             (T `(list ,item)))))
+    (let ((transformed-body
+            (loop for exp in body
+                  collect (etypecase exp
+                            ((or string character)
+                             `(format out "~A" ,exp))
+                            (list
+                             (if (listp (car exp))
+                                 (let ((lists (mapcar #'ensure-list exp)))
+                                   `(ansi:format-ansi out (list ,@lists)))
+                                 `(ansi:format-ansi out (list ,(ensure-list exp)))))))))
+      `(with-output-to-string (out) ,@transformed-body))))
