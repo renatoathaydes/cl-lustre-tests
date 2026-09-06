@@ -29,9 +29,9 @@ The ERROR-MODE should be one of :condition | :print | :exit."
         (handler-case
             (run-lustre-tests)
           (error (e)
-            (declare (ignore e))
+            (ansi:format-ansi T `((:fg :red "Lustre Tests error: ~A" ,e)))
             (ecase on-error
-              (:print nil) ;; the test-reporter already prints the error
+              (:print nil)
               (:exit (uiop:quit 1)))))))
   (format T "~%==> Running Lustre Tests' own tests (using basic-test-framework)!~%~%")
   (let ((error-count 0)
