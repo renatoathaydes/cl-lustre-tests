@@ -90,7 +90,7 @@ The MODE can be one of:
                                       (test simple-test)
                                       description
                                       ctx)
-  (lustre-tests/color-sexp:color-sexp (test-body test) stream)
+  (cs:color-sexp (test-body test) stream)
   (format stream " =>~%~A  ~A~%" indent description))
 
 (defmethod report-result (stream (reporter base-test-reporter) (test test-object) ctx)

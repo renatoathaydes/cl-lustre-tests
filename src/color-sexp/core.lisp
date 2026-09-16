@@ -1,5 +1,6 @@
 (in-package #:lustre-tests/color-sexp)
 
+;; if adding more special vars, update thread.lisp!
 (defparameter *string-color* nil)
 (defparameter *char-color* nil)
 (defparameter *number-color* nil)

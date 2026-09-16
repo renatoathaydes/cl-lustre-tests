@@ -131,8 +131,9 @@ Does not include any TEST-PARENT instances in the result."
       (let* ((children (if sequencer
                            (sequence-tests sequencer non-parents)
                            non-parents))
-             (thread (bt:make-thread (lambda () (thread-worker children on-child))
-                                     :name (format nil "~A" (test-name parent)))))
+             (thread (make-thread-with-bindings
+                      (lambda () (thread-worker children on-child))
+                      :name (format nil "~A" (test-name parent)))))
         ;; do the next parents while the current parent's children run
         (dolist (next-parent (if sequencer
                                  (sequence-parents sequencer parents)
