@@ -2,11 +2,11 @@
   (:use #:cl)
   (:documentation "The lustre-tests time package.")
   (:export #:print-time
-           #:internal-time-units-per-sec))
+           #:*internal-time-units-per-sec*))
 
 (in-package #:lustre-tests/time)
 
-(defparameter internal-time-units-per-sec internal-time-units-per-second
+(defparameter *internal-time-units-per-sec* internal-time-units-per-second
   "Special copy of INTERNAL-TIME-UNITS-PER-SECOND to allow for LET overrides.")
 
 (defun print-seconds (secs stream)
@@ -33,9 +33,9 @@ The TIME should be in INTERNAL-TIME-UNITS-PER-SECOND.
 Returns NIL (even if STREAM is NIL)."
   (if (zerop time)
       (write-string "0sec" stream)
-      (let ((internal-time-units-per-millis (floor internal-time-units-per-sec 1000))
-            (internal-time-units-per-micros (floor internal-time-units-per-sec 1000000)))
-        (multiple-value-bind (secs fraction) (floor time internal-time-units-per-sec)
+      (let ((internal-time-units-per-millis (floor *internal-time-units-per-sec* 1000))
+            (internal-time-units-per-micros (floor *internal-time-units-per-sec* 1000000)))
+        (multiple-value-bind (secs fraction) (floor time *internal-time-units-per-sec*)
           (multiple-value-bind (ms fraction) (floorz fraction internal-time-units-per-millis)
             (let* ((us (floorz fraction internal-time-units-per-micros))
                    (include-sec (> secs 0))
