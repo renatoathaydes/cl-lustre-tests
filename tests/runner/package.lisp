@@ -1,6 +1,7 @@
 (defpackage lustre-tests/runner
   (:documentation "basic-framework test runner.")
   (:use #:cl #:lustre-tests/basic-framework)
+  (:local-nicknames (#:lt #:lustre-tests))
   (:export #:run-tests))
 
 (in-package #:lustre-tests/runner)
@@ -15,24 +16,13 @@
                              ("  ~A~%" ,e)))
        :failed)))
 
-(defun run-tests (&key (on-error :condition))
-  "Run the tests.
-The ERROR-MODE should be one of :condition | :print | :exit."
+(defun run-tests ()
   (format T "==> Running Lustre Tests helper module tests!~%~%")
-  (flet ((run-lustre-tests ()
-           (let ((lustre-tests:*show-diff-with-ansi-colors* T))
-             (lustre-tests:test
-              :reporter (make-instance 'lustre-tests:ansi-test-reporter :mode :full)
-              :signal-condition-on-error? (not (eq on-error :print))))))
-    (if (eq :condition on-error)
-        (run-lustre-tests) ;; no handler in this case
-        (handler-case
-            (run-lustre-tests)
-          (error (e)
-            (ansi:format-ansi T `((:fg :red "Lustre Tests error: ~A" ,e)))
-            (ecase on-error
-              (:print nil)
-              (:exit (uiop:quit 1)))))))
+  (let ((reporter (make-instance 'lt:ansi-test-reporter :mode :full))
+        (lt:*show-diff-with-ansi-colors* T))
+    (lt:test :reporter reporter)
+    (unless (zerop (slot-value reporter 'lt::fail-count))
+      (uiop:quit 1)))
   (format T "~%==> Running Lustre Tests' own tests (using basic-test-framework)!~%~%")
   (let ((error-count 0)
         (success-count 0))
@@ -45,9 +35,5 @@ The ERROR-MODE should be one of :condition | :print | :exit."
         (ansi:format-ansi T `((:fg :green "OK - all ~A test(s) passed!~%" ,success-count)))
         (flet ((print-results ()
                  (ansi:format-ansi T `((:fg :red "Not OK: ~A error(s), ~A OK.~%" ,error-count ,success-count)))))
-          (ecase on-error
-            (:condition (error 'lustre-tests:test-error
-                               :reason `(:success-count ,success-count :error-count ,error-count)))
-            (:print (print-results))
-            (:exit (print-results)
-             (uiop:quit 1)))))))
+          (print-results)
+          (uiop:quit 1)))))

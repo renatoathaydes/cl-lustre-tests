@@ -68,5 +68,4 @@
                 :depends-on ("tests")
                 :components ((:file "package"))))
   :perform (asdf:test-op (op c)
-                         ;; on-error -> :condition | :print | :exit
-                         (uiop:symbol-call :lustre-tests/runner :run-tests :on-error :exit)))
+                         (uiop:symbol-call :lustre-tests/runner :run-tests)))
