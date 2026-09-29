@@ -93,11 +93,19 @@ Does not include any TEST-PARENT instances in the result."
 
 (defmethod test-passed? ((parent test-parent))
   (flet ((on-child (child)
-           (unless (test-passed? child)
+           (when (test-failed? child)
              (return-from test-passed? nil))))
     (dotests parent #'on-child)
-    ;; no early return, so all tests passed
+    ;; no early return, so all tests passed or ignored
     T))
+
+(defmethod test-failed? ((parent test-parent))
+  (flet ((on-child (child)
+           (when (test-failed? child)
+             (return-from test-failed? T))))
+    (dotests parent #'on-child)
+    ;; no early return, so no test failed
+    nil))
 
 (defmethod dotests ((parent test-parent) on-child
                     &optional on-start-parent on-end-parent sequencer)
@@ -141,7 +149,7 @@ Does not include any TEST-PARENT instances in the result."
           (dotests-parallel next-parent on-child on-start-parent on-end-parent))
         ;; wait for the children's results
         (multiple-value-bind (results err)
-            (bt:join-thread thread)
+            (bt2:join-thread thread)
           (loop for result in results
                 for child in children
                 do (setf (test-result child) result))

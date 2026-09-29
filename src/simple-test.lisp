@@ -28,6 +28,7 @@ the test runs."))
      (let* ((start-time (get-internal-real-time))
             (result (handler-case
                         (funcall (test-fun test))
+                      (test-done (c) (test-done-result c))
                       (error (e) (make-instance 'simple-test-result
                                                 :status :error
                                                 :duration (- (get-internal-real-time) start-time)

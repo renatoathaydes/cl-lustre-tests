@@ -86,6 +86,14 @@ A test normally passed if its TEST-RESULT-STATUS is set to :OK.")
   (:method ((test test-result)) (eq :IGNORED (test-result-status test)))
   (:method ((test test-object)) (test-ignored? (test-result test))))
 
+(defgeneric test-failed? (test)
+  (:documentation "Whether a test failed.
+By default, a test is assumed to have failed unless
+TEST-PASSED? OR TEST-IGNORED? returns T.")
+  (:method ((test test-result)) (not (or (test-passed? test)
+                                         (test-ignored? test))))
+  (:method ((test test-object)) (test-failed? (test-result test))))
+
 (defgeneric sequence-tests (sequencer tests)
   (:documentation "Returns a LIST of tests to run based on the given TESTS.")
   (:method ((sequencer test-sequencer) tests)
@@ -96,24 +104,17 @@ A test normally passed if its TEST-RESULT-STATUS is set to :OK.")
   (:method ((sequencer test-sequencer) parents)
     (error "SEQUENCE-PARENTS not implemented for TEST-SEQUENCER.")))
 
-(defgeneric report-start (stream reporter parent ctx)
-  (:documentation "Reports that tests in the PARENT are about to start running.
+(defgeneric report-start (stream reporter test ctx)
+  (:documentation "Reports that a TEST-OBJECT or TEST-PARENT is about to start running.
 Returns the CTX for the next calls.
-The CTX parameter is nil on the first call.
-Notice that nested TEST-PARENTs results in this method being called multiple times
-for each TEST invocation.")
-  (:method (stream (reporter test-reporter) parent ctx)
+The CTX parameter is nil on the first call.")
+  (:method (stream (reporter test-reporter) test ctx)
     (error "REPORT-START not implemented for TEST-REPORTER.")))
 
-(defgeneric report-result (stream reporter test ctx)
-  (:documentation "Reports a test result.")
-  (:method (stream (reporter test-reporter) (test test-object) ctx)
-    (error "REPORT-RESULT not implemented for TEST-REPORTER.")))
-
-(defgeneric report-end (stream reporter parent ctx)
-  (:documentation "Reports that tests in the PARENT have finished running.
+(defgeneric report-end (stream reporter test ctx)
+  (:documentation "Reports a TEST-OBJECT or TEST-PARENT has finished running.
 Returns the CTX for the next calls.")
-  (:method (stream (reporter test-reporter) parent ctx)
+  (:method (stream (reporter test-reporter) test ctx)
     (error "REPORT-END not implemented for TEST-REPORTER.")))
 
 (defgeneric report-result-description (stream reporter indent test description ctx)

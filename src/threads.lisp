@@ -14,10 +14,10 @@
     (*max-diff-items-to-display* . ,*max-diff-items-to-display*)
     (*max-displayed-items-before-diff* . ,*max-displayed-items-before-diff*)
     (*show-diff-with-ansi-colors* . ,*show-diff-with-ansi-colors*)
-    ,@bt:*default-special-bindings*))
+    ,@bt2:*default-special-bindings*))
 
 (defun make-thread-with-bindings (function &key name)
   "Create a Bordeaux Thread that inherits all the special variables defined
 by the Lustre-Tests library."
-  (let ((bt:*default-special-bindings* (all-special-vars)))
-    (bt:make-thread function :name name)))
+  (let ((bt2:*default-special-bindings* (all-special-vars)))
+    (bt2:make-thread function :name name)))

@@ -58,6 +58,15 @@ Use DEFINE-TEST! for more custom options.
 Returns the created TEST."
   `(define-test! ,name (,@parents) ('simple-test) ,@body))
 
+(defun perform-eval-test (test signal-condition-on-error?)
+  (if signal-condition-on-error?
+      (eval-test test)
+      (handler-bind ((test-error
+                       #'(lambda (c)
+                           (declare (ignore c))
+                           (invoke-restart 'continue))))
+        (eval-test test))))
+
 (defun test (&key
                (test-parent (init-root))
                (stream *standard-output*)
@@ -67,11 +76,12 @@ Returns the created TEST."
                (parallel? T))
   "Run all tests.
 The test protocol is as follows:
-  - report-start
+  - report-start for each TEST-PARENT
   - sequence-tests
-  - eval-test (for each test)
-  - report-result (for each test)
-  - report-end
+  - report-start for each TEST-OBJECT
+  - eval-test for each TEST-OBJECT
+  - report-end for each TEST-OBJECT
+  - report-end for each TEST-PARENT
 If SIGNAL-CONDITION-ON-ERROR? is NIL, test evaluation proceeds as normal,
 otherwise a TEST-ERROR condition is signalled on each test failure or error.
 If PARALLEL? is NIL, tests run on the caller Thread, otherwise each
@@ -92,20 +102,15 @@ TEST-PARENT runs its children on a different Thread."
                                     :duration time)))
              (setf ctx (report-end stream reporter p ctx)))
            (on-child (test)
-             (if signal-condition-on-error?
-                 (eval-test test)
-                 (handler-bind ((test-error
-                                  #'(lambda (c)
-                                      (declare (ignore c))
-                                      (invoke-restart 'continue))))
-                   (eval-test test)))
+             (setf ctx (report-start stream reporter test ctx))
+             (perform-eval-test test signal-condition-on-error?)
              (let ((result (test-result test)))
                (unless result
                  (error "Test ~A has no result after being run." (test-name test)))
                (unless (test-passed? test)
                  (let ((this-result (car results)))
                    (setf (car this-result) nil)))
-               (report-result stream reporter test ctx))))
+               (setf ctx (report-end stream reporter test ctx)))))
       (let ((iterate (if parallel? #'dotests-parallel #'dotests)))
         (funcall iterate test-parent #'on-child #'on-start-parent #'on-end-parent sequencer)))))
 

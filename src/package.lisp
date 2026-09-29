@@ -27,6 +27,8 @@
            #:dotests-parallel
            #:eval-test
            #:test-passed?
+           #:test-ignored?
+           #:test-failed?
            #:sequence-tests
            #:sequence-parents
            #:report-start
@@ -63,6 +65,9 @@
            #:test-reporter-mode
            ;; ansi-test-reporter slots
            #:ansi-enabled?
+           ;; opentest-test-reporter
+           #:opentest-test-reporter
+           #:opentest-stream
            ;; simple-test-sequencer slots
            #:test-sequence-ordering
            ;; expect-seq configuration
