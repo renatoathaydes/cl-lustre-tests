@@ -17,15 +17,17 @@
        :failed)))
 
 (defmacro with-test-reporter ((reporter) &body action)
-  (if nil
-      `(with-open-file (stream #P"unit-tests.xml"
-                               :direction :output
-                               :if-exists :supersede)
-         (let ((,reporter (make-instance 'lt:opentest-test-reporter :stream stream)))
-           ,@action))
-      `(let ((,reporter (make-instance 'lt:ansi-test-reporter :mode :full))
-             (lt:*show-diff-with-ansi-colors* T))
-         ,@action)))
+  (let ((r1 (gensym))
+        (r2 (gensym)))
+    `(with-open-file (stream #P"unit-tests.xml"
+                             :direction :output
+                             :if-exists :supersede)
+       (let* ((,r1 (make-instance 'lt:opentest-test-reporter :stream stream))
+              (,r2 (make-instance 'lt:ansi-test-reporter :mode :full))
+              (,reporter (make-instance 'lt:combined-test-reporter
+                                        :delegates (list ,r1 ,r2)))
+              (lt:*show-diff-with-ansi-colors* T))
+         ,@action))))
 
 (defun run-tests ()
   (format T "==> Running Lustre Tests helper module tests!~%~%")

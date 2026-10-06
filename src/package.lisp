@@ -37,9 +37,6 @@
            #:simple-test-result
            #:simple-test
            #:simple-test-sequencer
-           #:base-test-reporter
-           #:simple-test-reporter
-           #:ansi-test-reporter
            ;; conditions
            #:test-error
            #:test-done
@@ -60,13 +57,20 @@
            #:test-name
            #:test-package
            #:test-enabled?
-           ;; base-test-reporter slots
+           ;; base-test-reporter
+           #:base-test-reporter
            #:test-reporter-mode
-           ;; ansi-test-reporter slots
+           ;; simple-test-reporter
+           #:simple-test-reporter
+           ;; ansi-test-reporter
+           #:ansi-test-reporter
            #:ansi-enabled?
            ;; opentest-test-reporter
            #:opentest-test-reporter
            #:opentest-stream
+           ;; combined-test-reporter
+           #:combined-test-reporter
+           #:test-reporter-delegates
            ;; simple-test-sequencer slots
            #:test-sequence-ordering
            ;; expect-seq configuration
