@@ -73,7 +73,7 @@ The SEQUENCER should be used to determine the order of test iteration."))
   (:documentation "Run a TEST-OBJECT.
 Return the TEST-OBJECT with its TEST-RESULT having been set.")
   (:method ((test test-object))
-    (error "EVAL-TEST not implemented for TEST-OBJECT.")))
+    (error "EVAL-TEST not implemented for ~A." test)))
 
 (defgeneric test-passed? (test)
   (:documentation "Whether a test passed.
@@ -97,31 +97,31 @@ TEST-PASSED? OR TEST-IGNORED? returns T.")
 (defgeneric sequence-tests (sequencer tests)
   (:documentation "Returns a LIST of tests to run based on the given TESTS.")
   (:method ((sequencer test-sequencer) tests)
-    (error "SEQUENCE-TESTS not implemented for TEST-SEQUENCER.")))
+    (error "SEQUENCE-TESTS not implemented for ~A." sequencer)))
 
 (defgeneric sequence-parents (sequencer parents)
   (:documentation "Returns a LIST of TEST-PARENTs to run.")
   (:method ((sequencer test-sequencer) parents)
-    (error "SEQUENCE-PARENTS not implemented for TEST-SEQUENCER.")))
+    (error "SEQUENCE-PARENTS not implemented for ~A." sequencer)))
 
 (defgeneric report-start (stream reporter test ctx)
   (:documentation "Reports that a TEST-OBJECT or TEST-PARENT is about to start running.
 Returns the CTX for the next calls.
 The CTX parameter is nil on the first call.")
   (:method (stream (reporter test-reporter) test ctx)
-    (error "REPORT-START not implemented for TEST-REPORTER.")))
+    (error "REPORT-START not implemented for ~A" reporter)))
 
 (defgeneric report-end (stream reporter test ctx)
   (:documentation "Reports a TEST-OBJECT or TEST-PARENT has finished running.
 Returns the CTX for the next calls.")
   (:method (stream (reporter test-reporter) test ctx)
-    (error "REPORT-END not implemented for TEST-REPORTER.")))
+    (error "REPORT-END not implemented for ~A." reporter)))
 
 (defgeneric report-result-description (stream reporter indent test description ctx)
   (:documentation "Reports the TEST-RESULT-DESCRIPTION for a TEST-OBJECT.
 This method allows describing precisely why a test failed.
 Unlike the other TEST-REPORTER methods, this method is not called directly by the
-TEST function. Most implementations of REPORT-RESULT are expected to call it so
+TEST function. Most implementations of REPORT-END are expected to call it so
 that it's possible to customize the result description without having to create a
 full reporter type.")
   (:method (stream (reporter test-reporter) indent (test test-object) description ctx)

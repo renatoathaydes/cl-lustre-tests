@@ -62,17 +62,22 @@ The MODE can be one of:
 (defmethod report-start (stream (reporter ansi-test-reporter) (parent test-parent) ctx)
   (cond
     ((null ctx)
-     (ansi:format-ansi
-      stream
-      `(("== LUSTRE TESTS ==~%")
-        (:st :italic "Running ~A test(s).~%" ,(count-tests parent))))
+     (let ((format-ansi:*enabled* (ansi-enabled? reporter)))
+       (ansi:format-ansi
+        stream
+        `(("== LUSTRE TESTS ==~%")
+          (:st :italic "Running ~A test(s).~%" ,(count-tests parent)))))
      (create-ctx parent))
     (T
      (when (eq (test-reporter-mode reporter) :full)
-       (ansi:format-ansi
-        stream
-        `((:st :bold :fg :cyan "  ~A>> ~A~%" ,(car ctx) ,(test-full-name parent)))))
+       (let ((format-ansi:*enabled* (ansi-enabled? reporter)))
+         (ansi:format-ansi
+          stream
+          `((:st :bold :fg :cyan "  ~A>> ~A~%" ,(car ctx) ,(test-full-name parent))))))
      (increment-indent ctx))))
+
+(defmethod report-start (stream (reporter base-test-reporter) (test test-object) ctx)
+  ctx)
 
 (defmethod report-result-description (stream
                                       (reporter base-test-reporter)
@@ -134,7 +139,8 @@ The MODE can be one of:
          (result (test-result test))
          (duration (test-duration result))
          (indent (car ctx))
-         (desc (test-result-description result)))
+         (desc (test-result-description result))
+         (format-ansi:*enabled* (ansi-enabled? reporter)))
     (cond
       ((test-passed? result)
        (when (eq (test-reporter-mode reporter) :full)
@@ -168,17 +174,18 @@ The MODE can be one of:
   (decrement-indent (call-next-method)))
 
 (defmethod report-end (stream (reporter ansi-test-reporter) (parent test-parent) ctx)
-  (cond
-    ((eq (cdr ctx) parent)
-     (with-slots (ok-count ignored-count fail-count) reporter
-       (ansi:format-ansi stream
-                         `((:fg :green "Success: ~A, " ,ok-count)
-                           (:fg ,+gray+ "Ignored: ~A, " ,ignored-count)
-                           (:fg :red "Failures: ~A " ,fail-count))))
-     (print-duration (test-duration (test-result parent)) stream))
-    (T
-     (unless (eq (test-reporter-mode reporter) :quiet)
-       (ansi:format-ansi stream `(("~A" ,(car ctx))
-                                  (:st :bold :fg :cyan "<< ~A " ,(test-name parent))))
-       (print-duration (test-duration (test-result parent)) stream))))
+  (let ((format-ansi:*enabled* (ansi-enabled? reporter)))
+    (cond
+      ((eq (cdr ctx) parent)
+       (with-slots (ok-count ignored-count fail-count) reporter
+         (ansi:format-ansi stream
+                           `((:fg :green "Success: ~A, " ,ok-count)
+                             (:fg ,+gray+ "Ignored: ~A, " ,ignored-count)
+                             (:fg :red "Failures: ~A " ,fail-count))))
+       (print-duration (test-duration (test-result parent)) stream))
+      (T
+       (unless (eq (test-reporter-mode reporter) :quiet)
+         (ansi:format-ansi stream `(("~A" ,(car ctx))
+                                    (:st :bold :fg :cyan "<< ~A " ,(test-name parent))))
+         (print-duration (test-duration (test-result parent)) stream)))))
   (decrement-indent ctx))

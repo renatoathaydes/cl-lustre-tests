@@ -22,7 +22,8 @@
      (with-output-to-string (stream)
        (mocking-print-time
          (let ((ctx (lt:report-start stream reporter parent nil)))
-           (lt:report-result stream reporter child ctx)
+           (setf ctx (lt:report-start stream reporter child ctx))
+           (setf ctx (lt:report-end stream reporter child ctx))
            (lt:report-end stream reporter parent ctx)))))))
 
 (define-lustre-test ansi-test-reporter-prints-test-with-failure
@@ -47,7 +48,8 @@
      (with-output-to-string (stream)
        (mocking-print-time
          (let ((ctx (lt:report-start stream reporter parent nil)))
-           (lt:report-result stream reporter child ctx)
+           (setf ctx (lt:report-start stream reporter child ctx))
+           (setf ctx (lt:report-end stream reporter child ctx))
            (lt:report-end stream reporter parent ctx)))))))
 
 (define-lustre-test ansi-test-reporter-prints-test-parents-ok
@@ -105,12 +107,16 @@
      (with-output-to-string (stream)
        (mocking-print-time
          (let ((ctx (lt:report-start stream reporter parent-1 nil)))
-           (lt:report-result stream reporter child-1 ctx)
+           (setf ctx (lt:report-start stream reporter child-1 ctx))
+           (setf ctx (lt:report-end stream reporter child-1 ctx))
            (setf ctx (lt:report-start stream reporter parent-2 ctx))
-           (lt:report-result stream reporter child-2 ctx)
-           (lt:report-result stream reporter child-3 ctx)
+           (setf ctx (lt:report-start stream reporter child-2 ctx))
+           (setf ctx (lt:report-end stream reporter child-2 ctx))
+           (setf ctx (lt:report-start stream reporter child-3 ctx))
+           (setf ctx (lt:report-end stream reporter child-3 ctx))
            (setf ctx (lt:report-start stream reporter parent-3 ctx))
-           (lt:report-result stream reporter child-4 ctx)
+           (setf ctx (lt:report-start stream reporter child-4 ctx))
+           (setf ctx (lt:report-end stream reporter child-4 ctx))
            (setf ctx (lt:report-end stream reporter parent-3 ctx))
            (setf ctx (lt:report-end stream reporter parent-2 ctx))
            (lt:report-end stream reporter parent-1 ctx)))))))
@@ -170,12 +176,16 @@
      (with-output-to-string (stream)
        (mocking-print-time
          (let ((ctx (lt:report-start stream reporter parent-1 nil)))
-           (lt:report-result stream reporter child-1 ctx)
+           (setf ctx (lt:report-start stream reporter child-1 ctx))
+           (setf ctx (lt:report-end stream reporter child-1 ctx))
            (setf ctx (lt:report-start stream reporter parent-2 ctx))
-           (lt:report-result stream reporter child-2 ctx)
-           (lt:report-result stream reporter child-3 ctx)
+           (setf ctx (lt:report-start stream reporter child-2 ctx))
+           (setf ctx (lt:report-end stream reporter child-2 ctx))
+           (setf ctx (lt:report-start stream reporter child-3 ctx))
+           (setf ctx (lt:report-end stream reporter child-3 ctx))
            (setf ctx (lt:report-start stream reporter parent-3 ctx))
-           (lt:report-result stream reporter child-4 ctx)
+           (setf ctx (lt:report-start stream reporter child-4 ctx))
+           (setf ctx (lt:report-end stream reporter child-4 ctx))
            (setf ctx (lt:report-end stream reporter parent-3 ctx))
            (setf ctx (lt:report-end stream reporter parent-2 ctx))
            (lt:report-end stream reporter parent-1 ctx)))))))

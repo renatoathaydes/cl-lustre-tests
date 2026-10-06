@@ -16,18 +16,24 @@
                              ("  ~A~%" ,e)))
        :failed)))
 
+(defmacro with-test-reporter ((reporter) &body action)
+  (if nil
+      `(with-open-file (stream #P"unit-tests.xml"
+                               :direction :output
+                               :if-exists :supersede)
+         (let ((,reporter (make-instance 'lt:opentest-test-reporter :stream stream)))
+           ,@action))
+      `(let ((,reporter (make-instance 'lt:ansi-test-reporter :mode :full))
+             (lt:*show-diff-with-ansi-colors* T))
+         ,@action)))
+
 (defun run-tests ()
   (format T "==> Running Lustre Tests helper module tests!~%~%")
-  (with-open-file (stream #P"unit-tests.xml"
-                          :direction :output
-                          :if-exists :supersede)
-    (let ((reporter (make-instance 'lt:opentest-test-reporter :stream stream))
-;;  (let ((reporter (make-instance 'lt:ansi-test-reporter :mode :full))
-          (lt:*show-diff-with-ansi-colors* T))
-      (lt:test :reporter reporter)))
+  (with-test-reporter (reporter)
+    (lt:test :reporter reporter))
   (when (lt:test-failed? (lt:init-root))
     (ansi:format-ansi T "Aborting due to Lustre Test failure(s)." :fg :red)
-    );;(uiop:quit 1))
+    (uiop:quit 1))
   (format T "~%==> Running Lustre Tests' own tests (using basic-test-framework)!~%~%")
   (let ((error-count 0)
         (success-count 0))
@@ -41,6 +47,5 @@
         (flet ((print-results ()
                  (ansi:format-ansi T `((:fg :red "Not OK: ~A error(s), ~A OK.~%" ,error-count ,success-count)))))
           (print-results)
-          ;(uiop:quit 1)
-          ))))
+          (uiop:quit 1)))))
 

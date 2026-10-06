@@ -32,7 +32,6 @@
            #:sequence-tests
            #:sequence-parents
            #:report-start
-           #:report-result
            #:report-result-description
            #:report-end
            #:simple-test-result

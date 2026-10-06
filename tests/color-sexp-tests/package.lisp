@@ -31,6 +31,7 @@
    (cs:color-sexp-to-string '(function))))
 
 (lt:define-test colors-chars-and-strings (color-sexp)
+  (setf *print-readably* nil)
   (lt:expect-seq
    (ansi-seq "("
              (:fg cs:+default-char-color+ "#\\A")
@@ -50,6 +51,7 @@
    (cs:color-sexp-to-string '(&optional))))
 
 (lt:define-test colors-full-expression (color-sexp)
+  (setf *print-readably* nil)
   (lt:expect-seq
    (ansi-seq "("
              (:fg cs:+default-standard-macro-color+ "DEFUN")
