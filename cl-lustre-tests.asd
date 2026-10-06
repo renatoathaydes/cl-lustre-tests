@@ -32,6 +32,7 @@
                              (:file "simple-test" :depends-on ("protocol"))
                              (:file "test-parent" :depends-on ("protocol" "threads"))
                              (:file "test-reporter" :depends-on ("simple-test"))
+                             (:file "test-reporter-ansi" :depends-on ("test-reporter"))
                              (:file "test-reporter-opentest" :depends-on ("test-parent"))
                              (:file "test-sequencer" :depends-on ("protocol"))
                              (:file "expects" :depends-on ("special-vars" "simple-test"))
