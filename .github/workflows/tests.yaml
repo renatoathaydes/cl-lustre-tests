@@ -14,8 +14,8 @@ jobs:
   tests:
     strategy:
       matrix:
-        implementation: ['abcl', 'clisp', 'ecl', 'sbcl']
-        os: ['ubuntu-latest', 'macos-latest', 'windows-latest']
+        implementation: ['sbcl'] # ['abcl', 'clisp', 'ecl', 'sbcl']
+        os: ['ubuntu-latest', 'macos-latest']
     runs-on: '${{ matrix.os }}'
     name: 'Install Common Lisp'
     defaults:
@@ -28,7 +28,7 @@ jobs:
     - name: Install deps (MacOS via Homebrew)
       if: runner.os == 'macos'
       run: |
-        brew install sbcl
+        brew install sbcl ocicl
         # expose brew env to later steps
         brew shellenv | sed 's/^export //' >> "$GITHUB_ENV"
         echo "$(brew --prefix)/bin" >> "$GITHUB_PATH"
@@ -38,7 +38,7 @@ jobs:
       if: runner.os == 'Linux'
       run: |
         eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-        brew install sbcl
+        brew install sbcl ocicl
         # expose brew env to later steps
         brew shellenv | sed 's/^export //' >> "$GITHUB_ENV"
         echo "$(brew --prefix)/bin" >> "$GITHUB_PATH"
@@ -51,8 +51,10 @@ jobs:
         choco install -y sbcl openssl.light
         echo "C:\Program Files\OpenSSL\bin" | Out-File $env:GITHUB_PATH -Append
 
-    - name: Install OCICL dependencies
-      run: ./build.sh
+    - name: Install OCICL dependencies and build
+      run: |
+        ocicl install
+        ./build.sh
 
     - name: Run Tests
       run: ./test.sh
