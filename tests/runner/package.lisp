@@ -42,8 +42,14 @@
     (dolist (test *tests*)
       (let ((result (run-test test)))
         (ecase result
-          (:ok (incf success-count))
-          (:failed (incf error-count)))))
+          (:ok
+           (incf success-count)
+           (ansi:format-ansi T `((:fg :green "OK: ")
+                                 ("~A~%" ,test))))
+          (:failed
+           (incf error-count)
+           (ansi:format-ansi T `((:fg :red "FAILED: ")
+                                 ("~A~%" ,test)))))))
     (if (zerop error-count)
         (ansi:format-ansi T `((:fg :green "OK - all ~A test(s) passed!~%" ,success-count)))
         (flet ((print-results ()
