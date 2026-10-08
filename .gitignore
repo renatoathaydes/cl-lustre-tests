@@ -2,3 +2,7 @@
 .#*
 /ocicl/
 *.fasl
+
+*.html
+*.xml
+*.jar
