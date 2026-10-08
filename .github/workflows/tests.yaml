@@ -1,0 +1,58 @@
+name: ocicl CI
+
+on:
+  push:
+    branches: ['*']
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    strategy:
+      matrix:
+        implementation: ['abcl', 'clisp', 'ecl', 'sbcl']
+        os: ['ubuntu-latest', 'macos-latest', 'windows-latest']
+    runs-on: '${{ matrix.os }}'
+    name: 'Install Common Lisp'
+    defaults:
+      run:
+        shell: bash
+    steps:
+
+    - uses: actions/checkout@v4
+
+    - name: Install deps (MacOS via Homebrew)
+      if: runner.os == 'macos'
+      run: |
+        brew install sbcl
+        # expose brew env to later steps
+        brew shellenv | sed 's/^export //' >> "$GITHUB_ENV"
+        echo "$(brew --prefix)/bin" >> "$GITHUB_PATH"
+        echo "$(brew --prefix)/sbin" >> "$GITHUB_PATH"
+
+    - name: Install deps (Linux via Homebrew)
+      if: runner.os == 'Linux'
+      run: |
+        eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+        brew install sbcl
+        # expose brew env to later steps
+        brew shellenv | sed 's/^export //' >> "$GITHUB_ENV"
+        echo "$(brew --prefix)/bin" >> "$GITHUB_PATH"
+        echo "$(brew --prefix)/sbin" >> "$GITHUB_PATH"
+
+    - name: Install deps (Windows)
+      if: runner.os == 'Windows'
+      shell: powershell
+      run: |
+        choco install -y sbcl openssl.light
+        echo "C:\Program Files\OpenSSL\bin" | Out-File $env:GITHUB_PATH -Append
+
+    - name: Install OCICL dependencies
+      run: ./build.sh
+
+    - name: Run Tests
+      run: ./test.sh
