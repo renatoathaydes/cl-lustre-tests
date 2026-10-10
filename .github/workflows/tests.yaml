@@ -15,7 +15,7 @@ jobs:
     strategy:
       matrix:
         implementation: ['sbcl'] # ['abcl', 'clisp', 'ecl', 'sbcl']
-        os: ['ubuntu-latest', 'macos-latest']
+        os: ['ubuntu-latest', 'macos-latest', 'windows-latest']
     runs-on: '${{ matrix.os }}'
     name: 'Install Common Lisp'
     defaults:
@@ -50,6 +50,25 @@ jobs:
       run: |
         choco install -y sbcl openssl.light
         echo "C:\Program Files\OpenSSL\bin" | Out-File $env:GITHUB_PATH -Append
+        # OCICL (Download from GitHub Releases)
+        $version = "2.20.0"
+        $url = "https://github.com/ocicl/ocicl/releases/download/v$version/ocicl-$version-windows-amd64.zip"
+        $installDir = "$env:RUNNER_TEMP\ocicl"
+
+        New-Item -ItemType Directory -Force -Path $installDir | Out-Null
+
+        Invoke-WebRequest `
+          -Uri $url `
+          -OutFile "$env:RUNNER_TEMP\ocicl.zip"
+
+        Expand-Archive `
+          -Path "$env:RUNNER_TEMP\ocicl.zip" `
+          -DestinationPath $installDir `
+          -Force
+
+        # Make ocicl available to subsequent GitHub Actions steps
+        Add-Content -Path $env:GITHUB_PATH -Value $installDir
+
 
     - name: Install OCICL dependencies and build
       run: |
