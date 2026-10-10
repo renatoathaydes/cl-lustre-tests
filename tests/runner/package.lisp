@@ -30,7 +30,8 @@
          ,@action))))
 
 (defun run-tests ()
-  (format T "==> Running Lustre Tests helper module tests!~%~%")
+  (format T "==> Running Lustre Tests helper module tests!~%")
+  (format T "    Time resolution is ~E/sec.~%" internal-time-units-per-second)
   (with-test-reporter (reporter)
     (lt:test :reporter reporter))
   (when (lt:test-failed? (lt:init-root))
