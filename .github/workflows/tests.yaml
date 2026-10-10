@@ -53,6 +53,7 @@ jobs:
 
     - name: Install OCICL dependencies and build
       run: |
+        ocicl setup
         ocicl install
         ./build.sh
 
