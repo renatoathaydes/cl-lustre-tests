@@ -89,3 +89,11 @@ jobs:
         html_file: unit-tests.html
         raw: true
         job_summary: true
+
+    - name: Link to HTML Test Report
+      if: always() && steps.html_preview.outputs.artifact_url != ''
+      env:
+        REPORT_URL: ${{ steps.html_preview.outputs.artifact_url }}
+      run: |
+        echo "## HTML Test Report" >> "$GITHUB_STEP_SUMMARY"
+        echo "[Open or download the report]($REPORT_URL)" >> "$GITHUB_STEP_SUMMARY"
