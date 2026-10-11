@@ -69,6 +69,8 @@ jobs:
         # Make ocicl available to subsequent GitHub Actions steps
         Add-Content -Path $env:GITHUB_PATH -Value $installDir
 
+    - name: Download the open-test jar
+      run: curl -o open-test.jar https://repo1.maven.org/maven2/org/opentest4j/reporting/open-test-reporting-cli/0.2.7/open-test-reporting-cli-0.2.7-standalone.jar
 
     - name: Install OCICL dependencies and build
       run: |
@@ -77,4 +79,13 @@ jobs:
         ./build.sh
 
     - name: Run Tests
-      run: ./test.sh
+      run: ./test.sh -html
+
+    - name: Upload HTML Test Report
+      id: html_preview
+      if: always()
+      uses: pavi2410/html-preview-action@v5
+      with:
+        html_file: unit-tests.html
+        raw: true
+        job_summary: true
