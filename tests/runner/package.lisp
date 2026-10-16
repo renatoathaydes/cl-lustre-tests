@@ -30,23 +30,22 @@
         (file-stream (gensym))
         (exit-code (gensym)))
     `(let ((,exit-code
-             (block with-test-reporter
-               (with-open-file (,file-stream #P"unit-tests.xml"
-                                             :direction :output
-                                             :if-exists :supersede)
-                 (let* ((,r1 (make-instance 'lt:opentest-test-reporter
-                                            :stream ,file-stream
-                                            ;; we'll append non-lustre-tests results to the report
-                                            :footer? nil))
-                        (,r2 (make-instance 'lt:ansi-test-reporter :mode :full))
-                        (,reporter (make-instance 'lt:combined-test-reporter
-                                                  :delegates (list ,r1 ,r2)))
-                        (,stream ,file-stream)
-                        (lt:*show-diff-with-ansi-colors* T))
-                   (let ((result (progn ,@action)))
-                     ;; since the reporter did not print the footer, we do it here
-                     (write-string lt::+opentest-xml-footer+ ,file-stream)
-                     result))))))
+             (with-open-file (,file-stream #P"unit-tests.xml"
+                                           :direction :output
+                                           :if-exists :supersede)
+               (let* ((,r1 (make-instance 'lt:opentest-test-reporter
+                                          :stream ,file-stream
+                                          ;; we'll append non-lustre-tests results to the report
+                                          :footer? nil))
+                      (,r2 (make-instance 'lt:ansi-test-reporter :mode :full))
+                      (,reporter (make-instance 'lt:combined-test-reporter
+                                                :delegates (list ,r1 ,r2)))
+                      (,stream ,file-stream)
+                      (lt:*show-diff-with-ansi-colors* T))
+                 (let ((result (block with-test-reporter ,@action)))
+                   ;; since the reporter did not print the footer, we do it here
+                   (write-string lt::+opentest-xml-footer+ ,file-stream)
+                   result)))))
        (when ,exit-code (uiop:quit ,exit-code)))))
 
 (defun run-tests ()
