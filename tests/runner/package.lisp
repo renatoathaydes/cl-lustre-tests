@@ -60,7 +60,9 @@
     (format T "~%==> Running Lustre Tests' own tests (using basic-test-framework)!~%~%")
     (let ((root-id (bt2:atomic-integer-incf lt::*id-counter*))
           (error-count 0)
-          (success-count 0))
+          (success-count 0)
+          ;; these tests expect plain diffs, unlike the Lustre Tests run above
+          (lt:*show-diff-with-ansi-colors* nil))
       (lt::print-event-started root-id nil :non-lustre-tests stream)
       (dolist (test *tests*)
         (let ((test-passed? (run-test test root-id stream)))
