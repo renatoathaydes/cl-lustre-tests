@@ -68,6 +68,8 @@
            ;; opentest-test-reporter
            #:opentest-test-reporter
            #:opentest-stream
+           #:include-header?
+           #:include-footer?
            ;; combined-test-reporter
            #:combined-test-reporter
            #:test-reporter-delegates
