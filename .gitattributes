@@ -1,0 +1,4 @@
+# Always check out text files with LF line endings, including on Windows.
+# Tests compare output written with ~% (LF) against multi-line string literals,
+# which would contain CRLF if Git converted line endings on checkout.
+* text=auto eol=lf
