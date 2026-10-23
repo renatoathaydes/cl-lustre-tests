@@ -17,7 +17,7 @@ Also, configure your `asdf:test-op` to invoke the `test` function from this syst
 
 ```lisp
   :perform (asdf:test-op (op c)
-                         (uiop:symbol-call :lustre-tests/test))
+                         (uiop:symbol-call :lustre-tests :test))
 ```
 
 The main package is `lustre-tests`, which is a bit long, so add a nickname in your package declaration:
@@ -61,7 +61,7 @@ CL-USER> (lt:test-simple)
 ## Writing Tests
 
 A Lustre Test is a function which gets wrapped into an instance of `LT:SIMPLE-TEST` by default. `lt:define-test` makes an instance of that
-class and add the test name to the ROOT parent (accessible via `lt:init-root)`).
+class and add the test name to the ROOT parent (accessible via `(lt:init-root)`).
 
 If the function returns an instance of `LT:TEST-RESULT`, that's used as the actual result for the test,
 otherwise it's assumed that, as the test did not signal any conditions, it must have passed.
@@ -106,7 +106,7 @@ Each test definition may declare a test's parents. In the following example, we 
 Parent names don't need to be predefined. To check your test hiearchy, you can use `LT:PRINT-TEST-TREE`:
 
 ```lisp
-CL-USER> (lt:print-test-tree (init-root))
+CL-USER> (lt:print-test-tree (lt:init-root))
 ```
 
 Which, for the example above, prints:
@@ -121,7 +121,7 @@ Which, for the example above, prints:
 ### Test Parallelization
 
 Besides being useful for test organization, using test parents also enables parallelization:
-calling the `test` functions with `:parallel T` causes each TEST-PARENT to run its children on a separate Thread.
+calling the `test` functions with `:parallel? T` causes each TEST-PARENT to run its children on a separate Thread.
 
 > Warning: when using this option, use a TEST-REPORTER that can handle multi-threading.
   The default implementations may print overlapping results as they do not synchronize.
@@ -141,13 +141,12 @@ CL-USER> (lt:define-test arithmetics-work? ()
 NIL
 CL-USER> (lt:test-simple)
 == LUSTRE TESTS ==
-
 Running 1 test(s).
-ERROR: COMMON-LISP-USER::ARITHMETICS-WORK?
-(PROGN (ASSERT (= (+ 2 X) 5))) =>
-    The assertion (= (+ 2 X) 5) failed with (+ 2 X) = 7.
-Success: 0, Failures: 0, Errors: 1
-NIL
+ERROR: COMMON-LISP-USER::ARITHMETICS-WORK? (4µs)
+((ASSERT (= (+ 2 X) 5))) =>
+  The assertion (= (+ 2 X) 5) failed with (+ 2 X) = 7.
+Success: 0, Ignored: 0, Failures: 1 (6ms, 893µs)
+("" . #<LT:TEST-PARENT {80068FAED3}>)
 ```
 
 It can be clearly seen that the expression that failed the assertion evaluated to `7`, not the expected `5`.
@@ -257,7 +256,7 @@ To run a single `TEST-OBJECT` (usually of type `SIMPLE-TEST`), just run the func
 If you want the `test-result` to be set, then you need to use the `lt:eval-test` method:
 
 ```lisp
-CL-USER> (setvar test (lt:find-test 'foo (lt:init-root) '(p1 p2)))
+CL-USER> (defparameter test (lt:find-test 'foo (lt:init-root) '(p1 p2)))
 TEST
 CL-USER> (lt:eval-test test)
 #<LT:SIMPLE-TEST {8009613F63}>
@@ -284,8 +283,10 @@ appropriate defaults for that:
 The `lt:test-simple` function is better for the REPL. The differences from `lt:test` are:
 
 * it uses `simple-test-reporter` (no ANSI colors).
-* conditions are signalled on test failures, allowing fixing or skipping them live.
 * tests are not run in parallel.
+
+Neither function signals conditions on test failures by default. Pass `:signal-condition-on-error? T` to
+`lt:test-simple` to fix or skip failures live (see [Debugging tests](#debugging-tests)).
 
 ## Deleting tests
 
