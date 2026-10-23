@@ -310,3 +310,6 @@ CL-USER> (lt:print-test-tree (lt:init-root))
 
 `cl-lustre-tests` was written by Renato Athaydes and is distributed
 under the terms of the MIT license.
+
+AI was NOT used to write any code. LLMs are only used to fix build issues
+and for minor test changes.
