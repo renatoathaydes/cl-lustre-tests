@@ -23,14 +23,12 @@ jobs:
         shell: bash
     steps:
 
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
 
     - name: Install deps (MacOS via Homebrew)
       if: runner.os == 'macos'
       run: |
         brew install sbcl ocicl
-        # expose brew env to later steps
-        brew shellenv | sed 's/^export //' >> "$GITHUB_ENV"
         echo "$(brew --prefix)/bin" >> "$GITHUB_PATH"
         echo "$(brew --prefix)/sbin" >> "$GITHUB_PATH"
 
@@ -39,8 +37,6 @@ jobs:
       run: |
         eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
         brew install sbcl ocicl
-        # expose brew env to later steps
-        brew shellenv | sed 's/^export //' >> "$GITHUB_ENV"
         echo "$(brew --prefix)/bin" >> "$GITHUB_PATH"
         echo "$(brew --prefix)/sbin" >> "$GITHUB_PATH"
 
@@ -75,7 +71,8 @@ jobs:
     - name: Install OCICL dependencies and build
       run: |
         ocicl setup
-        ocicl install
+        # retry, as downloads from ghcr.io occasionally get their connection reset
+        for i in 1 2 3; do ocicl install && break; [ "$i" = 3 ] && exit 1; sleep 10; done
         ./build.sh
 
     - name: Run Tests
@@ -87,7 +84,6 @@ jobs:
       uses: pavi2410/html-preview-action@v5
       with:
         html_file: unit-tests.html
-        raw: true
         job_summary: true
 
     - name: Link to HTML Test Report
