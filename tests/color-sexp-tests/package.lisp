@@ -52,53 +52,89 @@
 
 (lt:define-test colors-full-expression (color-sexp)
   (setf *print-readably* nil)
-  (lt:expect-seq
-   (ansi-seq "("
-             (:fg cs:+default-standard-macro-color+ "DEFUN")
-             " "
-             (:fg cs:+default-symbol-color+ "MY-FUN")
-             " ("
-             (:fg cs:+default-symbol-color+ "ARG")
-             " "
-             (:fg cs:+default-lambda-list-keyword-color+ "&KEY")
-             " "
-             (:fg cs:+default-symbol-color+ "K1")
-             ") "
-             (:fg cs:+default-string-color+ "\"My function.\"")
-             " ("
-             (:fg cs:+default-special-operator-color+ "LET")
-             " (("
-             (:fg cs:+default-symbol-color+ "X")
-             " "
-             (:fg cs:+default-char-color+ "#\\A")
-             ")) ("
-             (:fg cs:+default-standard-macro-color+ "DOLIST")
-             " ("
-             (:fg cs:+default-symbol-color+ "ITEM")
-             " "
-             (:fg cs:+default-symbol-color+ "K1")
-             ") ("
-             (:fg cs:+default-symbol-color+ "FORMAT")
-             " "
-             (:fg cs:+default-symbol-color+ "T")
-             " "
-             (:fg cs:+default-string-color+ "\"STR\"")
-             " "
-             (:fg cs:+default-keyword-color+ ":K")
-             " "
-             (:fg cs:+default-symbol-color+ "MY-SYMBOLS:FOO")
-             " ("             
-             (:fg cs:+default-symbol-color+ "Y")
-             " "
-             (:fg cs:+default-number-color+ "2")
-             " "
-             (:fg cs:+default-symbol-color+ "X")
-             " "
-             (:fg cs:+default-symbol-color+ "ITEM")
-             ")))))")
-   (cs:color-sexp-to-string
-    '(defun my-fun (arg &key k1)
-      "My function."
-      (let ((x #\A))
-        (dolist (item k1) (format T "STR" :k my-symbols:foo (y 2 x item)))))
-    (find-package :lustre-tests/color-sexp/tests))))
+  (let ((cs:*sexp-line-limit* nil))
+    (lt:expect-seq
+     (ansi-seq "("
+               (:fg cs:+default-standard-macro-color+ "DEFUN")
+               " "
+               (:fg cs:+default-symbol-color+ "MY-FUN")
+               " ("
+               (:fg cs:+default-symbol-color+ "ARG")
+               " "
+               (:fg cs:+default-lambda-list-keyword-color+ "&KEY")
+               " "
+               (:fg cs:+default-symbol-color+ "K1")
+               ") "
+               (:fg cs:+default-string-color+ "\"My function.\"")
+               " ("
+               (:fg cs:+default-special-operator-color+ "LET")
+               " (("
+               (:fg cs:+default-symbol-color+ "X")
+               " "
+               (:fg cs:+default-char-color+ "#\\A")
+               ")) ("
+               (:fg cs:+default-standard-macro-color+ "DOLIST")
+               " ("
+               (:fg cs:+default-symbol-color+ "ITEM")
+               " "
+               (:fg cs:+default-symbol-color+ "K1")
+               ") ("
+               (:fg cs:+default-symbol-color+ "FORMAT")
+               " "
+               (:fg cs:+default-symbol-color+ "T")
+               " "
+               (:fg cs:+default-string-color+ "\"STR\"")
+               " "
+               (:fg cs:+default-keyword-color+ ":K")
+               " "
+               (:fg cs:+default-symbol-color+ "MY-SYMBOLS:FOO")
+               " ("
+               (:fg cs:+default-symbol-color+ "Y")
+               " "
+               (:fg cs:+default-number-color+ "2")
+               " "
+               (:fg cs:+default-symbol-color+ "X")
+               " "
+               (:fg cs:+default-symbol-color+ "ITEM")
+               ")))))")
+     (cs:color-sexp-to-string
+      '(defun my-fun (arg &key k1)
+        "My function."
+        (let ((x #\A))
+          (dolist (item k1) (format T "STR" :k my-symbols:foo (y 2 x item)))))
+      (find-package :lustre-tests/color-sexp/tests)))))
+
+(lt:define-test breaks-long-lines (color-sexp)
+  (let ((cs:*sexp-line-limit* 20))
+    (lt:expect-seq
+     (ansi-seq "("
+               (:fg cs:+default-standard-macro-color+ "DEFUN")
+               " "
+               (:fg cs:+default-symbol-color+ "FOO")
+               " ("
+               (:fg cs:+default-symbol-color+ "A")
+               " "
+               (:fg cs:+default-symbol-color+ "B")
+               ")"
+               #\Newline
+               "  ("
+               (:fg cs:+default-symbol-color+ "LIST")
+               " "
+               (:fg cs:+default-symbol-color+ "A")
+               " "
+               (:fg cs:+default-symbol-color+ "B")
+               " "
+               (:fg cs:+default-symbol-color+ "C")
+               " "
+               (:fg cs:+default-symbol-color+ "D")
+               " "
+               (:fg cs:+default-symbol-color+ "E")
+               " "
+               (:fg cs:+default-symbol-color+ "F")
+               #\Newline
+               "    "
+               (:fg cs:+default-symbol-color+ "G")
+               "))")
+     (cs:color-sexp-to-string
+      '(defun foo (a b) (list a b c d e f g))
+      (find-package :lustre-tests/color-sexp/tests)))))

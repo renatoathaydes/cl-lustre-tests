@@ -10,6 +10,7 @@
     (cs:*special-operator-color* . ,cs:*special-operator-color*)
     (cs:*standard-macro-color* . ,cs:*standard-macro-color*)
     (cs:*lambda-list-keyword-color* . ,cs:*lambda-list-keyword-color*)
+    (cs:*sexp-line-limit* . ,cs:*sexp-line-limit*)
     (time:*internal-time-units-per-sec* . time:*internal-time-units-per-sec*)
     (*max-diff-items-to-display* . ,*max-diff-items-to-display*)
     (*max-displayed-items-before-diff* . ,*max-displayed-items-before-diff*)

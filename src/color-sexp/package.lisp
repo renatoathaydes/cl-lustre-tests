@@ -11,6 +11,7 @@
            #:*special-operator-color*
            #:*standard-macro-color*
            #:*lambda-list-keyword-color*
+           #:*sexp-line-limit*
            #:+default-color+
            #:+default-string-color+
            #:+default-char-color+
