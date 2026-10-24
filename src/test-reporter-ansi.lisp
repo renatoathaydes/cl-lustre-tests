@@ -30,7 +30,7 @@
                                       (test simple-test)
                                       description
                                       ctx)
-  (cs:color-sexp (test-body test) stream)
+  (lustre-tests/color-sexp:color-sexp (test-body test) stream)
   (format stream " =>~%~A  ~A~%" indent description))
 
 (defmethod report-end (stream (reporter ansi-test-reporter) (test test-object) ctx)

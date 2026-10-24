@@ -85,7 +85,8 @@ The test protocol is as follows:
 If SIGNAL-CONDITION-ON-ERROR? is NIL, test evaluation proceeds as normal,
 otherwise a TEST-ERROR condition is signalled on each test failure or error.
 If PARALLEL? is NIL, tests run on the caller Thread, otherwise each
-TEST-PARENT runs its children on a different Thread."
+TEST-PARENT runs its children on a different Thread.
+On CLISP, tests always run serially on the caller thread, even if PARALLEL? is true."
   (let ((ctx nil)
         (start-times nil)
         (results nil))

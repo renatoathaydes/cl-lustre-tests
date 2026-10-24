@@ -2,6 +2,4 @@
   (:documentation "lustre-tests core tests.")
   (:use #:cl
         #:lustre-tests/test-helpers
-        #:lustre-tests/basic-framework)
-  (:local-nicknames
-   (#:lt #:lustre-tests)))
+        #:lustre-tests/basic-framework))

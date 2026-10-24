@@ -3,15 +3,15 @@
 (define-lustre-test report-successful-tests-correctly-simple
   (with-local-root (root)
     (in-package #:lustre-tests/tests) ;; fixes symbols for the test names below!
-    (lt:define-test test-2+2=4 ()
+    (lustre-tests:define-test test-2+2=4 ()
       (assert (= (+ 2 2) 4)))
-    (lt:define-test test-string (string-tests)
+    (lustre-tests:define-test test-string (string-tests)
       (assert (string= (string #\A) "A")))
     (let ((result
             (with-output-to-string (stream)
               (mocking-print-time
-                (lt:test-simple :stream stream :test-parent root :parallel? nil)))))
-      (lt:expect-seq "== LUSTRE TESTS ==
+                (lustre-tests:test-simple :stream stream :test-parent root :parallel? nil)))))
+      (lustre-tests:expect-seq "== LUSTRE TESTS ==
 Running 2 test(s).
 OK: LUSTRE-TESTS/TESTS::TEST-2+2=4 (1)
   >> STRING-TESTS
@@ -24,15 +24,15 @@ Success: 2, Ignored: 0, Failures: 0 (4)
 (define-lustre-test report-successful-tests-correctly-by-default
   (with-local-root (root)
     (in-package #:lustre-tests/tests) ;; fixes symbols for the test names below!
-    (lt:define-test test-2+2=4 ()
+    (lustre-tests:define-test test-2+2=4 ()
       (assert (= (+ 2 2) 4)))
-    (lt:define-test test-string (string-tests)
+    (lustre-tests:define-test test-string (string-tests)
       (assert (string= (string #\A) "A")))
     (let ((result
             (with-output-to-string (stream)
               (mocking-print-time
-                (lt:test :stream stream :test-parent root :parallel? nil)))))
-      (lt:expect-seq
+                (lustre-tests:test :stream stream :test-parent root :parallel? nil)))))
+      (lustre-tests:expect-seq
        (concatenate
         'string
         (ansi:format-ansi

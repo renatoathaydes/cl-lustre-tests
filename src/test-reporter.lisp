@@ -40,7 +40,7 @@ The MODE can be one of:
 
 (defun print-duration (duration stream)
   (write-char #\( stream)
-  (time:print-time duration stream)
+  (lustre-tests/time:print-time duration stream)
   (write-char #\) stream)
   (terpri stream))
 

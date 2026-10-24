@@ -10,14 +10,14 @@
                        (assert
                         nil ()
                         "Expected TEST-DONE condition, but nothing was signalled."))
-                   (lt:test-done (c)
-                     (lt:test-done-result c)))))
+                   (lustre-tests:test-done (c)
+                     (lustre-tests:test-done-result c)))))
      (assert result)
-     (assert (eq (lt:test-result-status result) :failed))
-     (assert (string= (lt:test-result-description result) ,expected))))
+     (assert (eq (lustre-tests:test-result-status result) :failed))
+     (assert (string= (lustre-tests:test-result-description result) ,expected))))
 
 (define-lustre-test expect-seq-equal-seqs
-  (assert-ok-result (lt:expect-seq "" "")))
+  (assert-ok-result (lustre-tests:expect-seq "" "")))
 
 (define-lustre-test expect-seq-not-equal-same-length
   (let ((lustre-tests:*max-diff-items-to-display* 3)
@@ -197,3 +197,12 @@ Actual:   ...12 13 66 15...
          (write-string "18 " s)
          (print-colored :green "19 " s)
          (print-colored :green "20" s))))))
+
+(define-lustre-test expects-output-stream-reports-visible-column
+  (let ((stream (make-instance 'lustre-tests::expects-output-stream)))
+    (write-char #\A stream)
+    (write-char #\Newline stream)
+    (assert (= 5 (trivial-gray-streams:stream-line-column stream)))
+    (lustre-tests::with-color :red (stream)
+      (write-char #\B stream))
+    (assert (= 6 (trivial-gray-streams:stream-line-column stream)))))

@@ -14,7 +14,7 @@
                 "format-ansi"
                 "edit-distance"
                 "trivial-gray-streams"
-                "bordeaux-threads")
+                #-clisp "bordeaux-threads")
   :components ((:module "color-sexp"
                 :pathname "src/color-sexp"
                 :components ((:file "package")
@@ -27,7 +27,8 @@
                 :components ((:file "package")
                              (:file "protocol" :depends-on ("package"))
                              (:file "special-vars" :depends-on ("package"))
-                             (:file "threads" :depends-on ("special-vars"))
+                             (:file "threads" :depends-on ("special-vars")
+                              :if-feature (:not :clisp))
                              (:file "test-result" :depends-on ("protocol"))
                              (:file "simple-test" :depends-on ("protocol"))
                              (:file "test-parent" :depends-on ("protocol" "threads"))
@@ -67,7 +68,9 @@
                              (:file "opentest-test-reporter-tests" :depends-on ("package"))
                              (:file "expect-seq-tests" :depends-on ("package"))
                              (:file "eval-test-tests" :depends-on ("package"))
-                             (:file "end-to-end-tests" :depends-on ("package"))))
+                             (:file "end-to-end-tests" :depends-on ("package"))
+                             (:file "clisp-tests" :depends-on ("package")
+                              :if-feature :clisp)))
                (:module "runner"
                 :depends-on ("tests")
                 :components ((:file "package"))))

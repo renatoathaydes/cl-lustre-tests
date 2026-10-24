@@ -124,6 +124,12 @@ Does not include any TEST-PARENT instances in the result."
   (when on-end-parent
     (funcall on-end-parent parent)))
 
+#+clisp
+(defmethod dotests-parallel ((parent test-parent) on-child
+                             &optional on-start-parent on-end-parent sequencer)
+  (dotests parent on-child on-start-parent on-end-parent sequencer))
+
+#-clisp
 (defmethod dotests-parallel ((parent test-parent) on-child
                              &optional on-start-parent on-end-parent sequencer)
   (flet ((thread-worker (tests on-child)

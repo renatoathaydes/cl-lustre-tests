@@ -65,6 +65,7 @@ The SEQUENCER should be used to determine the order of test iteration."))
 (defgeneric dotests-parallel (parent on-child
                               &optional on-start-parent on-end-parent sequencer)
   (:documentation "Like DOTESTS, but runs tests in parallel.
+On CLISP, this delegates to serial DOTESTS instead.
 ON-START-PARENT and ON-END-PARENT are called for each child that is a TEST-PARENT.
 ON-CHILD is called for each non-TEST-PARENT child.
 The SEQUENCER should be used to determine the order of test iteration."))

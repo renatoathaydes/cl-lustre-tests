@@ -2,8 +2,6 @@
   (:documentation "Tiniest test framework in the world.
     Tests are just functions whose names are pushed into *tests*.")
   (:use #:cl)
-  (:local-nicknames
-   (#:lt #:lustre-tests))
   (:export #:*tests*
            #:define-lustre-test
            #:assert-t
@@ -21,10 +19,10 @@
      (pushnew ',name *tests*)))
 
 (defmacro with-local-root ((root) &body body)
-  `(let* ((lt::*root-test-parent*
-            (make-instance 'lt:test-parent :name 'lt::ROOT))
+  `(let* ((lustre-tests::*root-test-parent*
+            (make-instance 'lustre-tests:test-parent :name 'lustre-tests::ROOT))
           (,root
-            lt::*root-test-parent*))
+            lustre-tests::*root-test-parent*))
      ,@body))
 
 (defmacro mocking-print-time (&body body)

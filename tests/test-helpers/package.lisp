@@ -2,22 +2,20 @@
   (:use #:cl)
   (:export #:make-test-ok
            #:make-test-with-error
-           #:ansi-seq)
-  (:local-nicknames
-   (#:lt #:lustre-tests)))
+           #:ansi-seq))
 
 (in-package #:lustre-tests/test-helpers)
 
 (defun make-test-ok (name &optional description)
-  (make-instance 'lt:test-object
+  (make-instance 'lustre-tests:test-object
                  :name name
-                 :result (make-instance 'lt:test-result
+                 :result (make-instance 'lustre-tests:test-result
                                         :description description)))
 
 (defun make-test-with-error (name error)
-  (make-instance 'lt:test-object
+  (make-instance 'lustre-tests:test-object
                  :name name
-                 :result (make-instance 'lt:test-result
+                 :result (make-instance 'lustre-tests:test-result
                                         :status :error
                                         :description error)))
 

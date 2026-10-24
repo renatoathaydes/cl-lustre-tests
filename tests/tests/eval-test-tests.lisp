@@ -1,39 +1,39 @@
 (in-package #:lustre-tests/tests)
 
 (define-lustre-test eval-simple-test-ok-result
-  (let ((test (make-instance 'lt:simple-test
+  (let ((test (make-instance 'lustre-tests:simple-test
                              :name "example test"
                              :fun (lambda ())
                              :body nil)))
-    (lt:eval-test test)
-    (let ((result (lt:test-result test)))
-      (check-type result lt:simple-test-result)
-      (assert (eq :ok (lt:test-result-status result))))))
+    (lustre-tests:eval-test test)
+    (let ((result (lustre-tests:test-result test)))
+      (check-type result lustre-tests:simple-test-result)
+      (assert (eq :ok (lustre-tests:test-result-status result))))))
 
 (define-lustre-test eval-simple-test-fail-result
-  (let ((test (make-instance 'lt:simple-test
+  (let ((test (make-instance 'lustre-tests:simple-test
                              :name "example test"
                              :fun (lambda () (error "no good"))
                              :body nil)))
     (let ((condition
-            (handler-case (lt:eval-test test)
-              (lt:test-error (c) c)
+            (handler-case (lustre-tests:eval-test test)
+              (lustre-tests:test-error (c) c)
               (error (c) (error "Expected TEST-ERROR but got ~A" c)))))
-      (check-type condition lt:test-error)
-      (let ((result (lt:test-result test)))
-        (check-type result lt:simple-test-result)
-        (assert (eq :error (lt:test-result-status result)))
-        (let ((desc (lt:test-result-description result)))
+      (check-type condition lustre-tests:test-error)
+      (let ((result (lustre-tests:test-result test)))
+        (check-type result lustre-tests:simple-test-result)
+        (assert (eq :error (lustre-tests:test-result-status result)))
+        (let ((desc (lustre-tests:test-result-description result)))
           (check-type desc simple-error)
-          (lt:expect-seq "no good" (simple-condition-format-control desc)))))))
+          (lustre-tests:expect-seq "no good" (simple-condition-format-control desc)))))))
 
 (define-lustre-test eval-simple-test-fails-but-ignored
-  (let ((test (make-instance 'lt:simple-test
+  (let ((test (make-instance 'lustre-tests:simple-test
                              :name "example test"
                              :enabled nil
                              :fun (lambda () (error "no good"))
                              :body nil)))
-    (lt:eval-test test)
-    (let ((result (lt:test-result test)))
-      (check-type result lt:simple-test-result)
-      (assert (eq :ignored (lt:test-result-status result))))))
+    (lustre-tests:eval-test test)
+    (let ((result (lustre-tests:test-result test)))
+      (check-type result lustre-tests:simple-test-result)
+      (assert (eq :ignored (lustre-tests:test-result-status result))))))
