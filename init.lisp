@@ -1,4 +1,13 @@
-(require "asdf")
+(handler-case (require "asdf")
+  (error (condition)
+    (let ((bundled-asdf
+            (merge-pathnames
+             #+(or win32 windows mswindows) #p"AppData/Local/ocicl/asdf.lisp"
+             #-(or win32 windows mswindows) #p".local/share/ocicl/asdf.lisp"
+             (user-homedir-pathname))))
+      (if (probe-file bundled-asdf)
+          (load bundled-asdf)
+          (error condition)))))
 
 #-ocicl
 (let ((runtime

@@ -1,7 +1,7 @@
 #! /bin/sh
 
 if [ "$#" -ne 1 ]; then
-    echo "Usage: $0 <Lisp form> (LISP_IMPL=sbcl|abcl|ecl; default: sbcl)" >&2
+    echo "Usage: $0 <Lisp form> (LISP_IMPL=sbcl|abcl|clisp|ecl; default: sbcl)" >&2
     exit 2
 fi
 
@@ -14,11 +14,14 @@ case "${LISP_IMPL:-sbcl}" in
     abcl)
         set -- abcl --noinit --batch
         ;;
+    clisp)
+        exec clisp -q -norc -on-error exit -i init.lisp -i cl-lustre-tests.asd -x "$form"
+        ;;
     ecl)
         set -- ecl --norc --nodebug
         ;;
     *)
-        echo "Unsupported LISP_IMPL: $LISP_IMPL (expected sbcl, abcl, or ecl)" >&2
+        echo "Unsupported LISP_IMPL: $LISP_IMPL (expected sbcl, abcl, clisp, or ecl)" >&2
         exit 2
         ;;
 esac
