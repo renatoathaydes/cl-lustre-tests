@@ -1,7 +1,7 @@
 ---
 id: lustre-tests-color-sexp
 type: submodule-design
-status: draft
+status: active
 title: S-expression diagnostic formatting
 parent: lustre-tests-core
 tags: [formatting]
@@ -17,9 +17,8 @@ returns a string; it neither evaluates forms nor knows about test objects or
 reporter lifecycles. Package independence is described in
 `lustre-tests-architecture`.
 
-This responsibility is explicit in the package documentation. Treating it as a
-reusable presentation boundary, rather than a general Lisp pretty-printer, is an
-unconfirmed interpretation of its use by the ANSI reporter.
+This is a reusable diagnostic presentation helper, not a general Lisp
+pretty-printer.
 
 ## Formatting contract
 

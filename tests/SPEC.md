@@ -1,7 +1,7 @@
 ---
 id: lustre-tests-tests
 type: module-design
-status: draft
+status: active
 title: Framework verification harness
 parent: lustre-tests-architecture
 depends-on: [lustre-tests-core, lustre-tests-color-sexp, lustre-tests-time]
@@ -29,8 +29,8 @@ independent implementation of every assertion: those tests still use
 Framework tests isolate the dynamically bound root, construct synthetic results,
 and temporarily replace time formatters to compare deterministic reports. These
 intentional internal accesses do not make the referenced internals public API.
-Clock replacement mutates global function bindings; inferring that the affected
-tests must not overlap is unconfirmed harness policy.
+Clock replacement mutates global function bindings, so the affected tests must
+not overlap.
 
 ## Runner and reporting contract
 

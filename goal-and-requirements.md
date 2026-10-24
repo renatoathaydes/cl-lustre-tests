@@ -1,7 +1,7 @@
 ---
 id: lustre-tests-goals
 type: goal-and-requirements
-status: draft
+status: active
 title: CL-Lustre-Tests goals and requirements
 tags: [product]
 ---
@@ -14,9 +14,6 @@ Provide a Common Lisp testing framework focused on usability and informative
 reporting. Lisp developers can write ordinary functions with assertions, run them
 from a REPL or ASDF/CI, and extend the framework through a small CLOS protocol
 without needing to understand that protocol for everyday use.
-
-The README establishes this goal and the assertion philosophy below. The audience
-is inferred from its REPL and CI workflows; that emphasis is unconfirmed.
 
 ## Capabilities
 
@@ -41,9 +38,11 @@ Common Lisp's `assert` and `check-type` are the normal assertion tools.
 `expect-seq` is the deliberately focused addition: useful sequence diagnostics,
 not a replacement assertion language.
 
-Portability across Common Lisp implementations is an explicit intent, confirmed
-by the maintainer. Current CI verifies SBCL on Linux, macOS, and Windows; it does
-not establish that other implementations work.
+Portability across Common Lisp implementations is an explicit intent. Only SBCL
+is currently tested, on Linux, macOS, and Windows, because the GitHub Actions
+setup for testing other implementations is not implemented properly yet. This is
+a CI tooling limitation, not an SBCL-only support decision; other implementations
+remain unverified.
 
 Terminal/CI and REPL entry points have distinct defaults so ordinary use does not
 require building a custom runner. The core behavior and its current limitations

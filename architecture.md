@@ -1,7 +1,7 @@
 ---
 id: lustre-tests-architecture
 type: architecture-design
-status: draft
+status: active
 title: CL-Lustre-Tests architecture
 parent: lustre-tests-goals
 tags: [architecture]
@@ -16,9 +16,7 @@ system `cl-lustre-tests`. It registers and evaluates Lisp tests in the calling
 image; reports go to caller-supplied streams. It does not own an external test
 service or a separate execution process.
 
-`lustre-tests-goals` owns product scope. This architecture is derived from the
-README, ASDF definitions, source, and tests; its boundary interpretation remains
-unconfirmed until reviewed.
+`lustre-tests-goals` owns product scope.
 
 ## Modules and dependency direction
 

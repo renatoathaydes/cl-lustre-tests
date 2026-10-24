@@ -1,7 +1,7 @@
 ---
 id: lustre-tests-time
 type: submodule-design
-status: draft
+status: active
 title: Duration and timestamp formatting
 parent: lustre-tests-core
 tags: [formatting]
@@ -15,9 +15,6 @@ The `lustre-tests/time` package turns numeric clock inputs into report text. It
 does not measure test execution, schedule tests, or depend on test objects. The
 caller supplies durations or timestamp inputs and owns their meaning; dependency
 direction is recorded in `lustre-tests-architecture`.
-
-The formatting behavior is observed in source and tests. Interpreting this as a
-presentation-only boundary is unconfirmed until review.
 
 ## Duration contract
 

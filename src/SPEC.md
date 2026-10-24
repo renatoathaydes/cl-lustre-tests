@@ -1,7 +1,7 @@
 ---
 id: lustre-tests-core
 type: module-design
-status: draft
+status: active
 title: Testing protocol and runtime
 parent: lustre-tests-architecture
 depends-on: [lustre-tests-color-sexp, lustre-tests-time]
@@ -18,8 +18,6 @@ reporting. Helpers own presentation only; their dependency direction and the
 external libraries are recorded in `lustre-tests-architecture`.
 
 These contracts describe current source and test behavior, not a redesigned API.
-The division into cooperating responsibilities within this package is an
-unconfirmed architectural interpretation.
 
 ## Registration and identity
 
@@ -64,7 +62,6 @@ Serial traversal partitions direct tests from child parents, visiting tests firs
 The default sequencer orders each list by declaration, with reverse and random
 policies available. The current recursive traversal does not forward a custom
 sequencer into nested parents, so its selection/order is not applied recursively.
-This is observed behavior; whether it is intentional is unconfirmed.
 
 Parallel traversal runs a parent's direct tests sequentially on its worker while
 traversing child parents, then joins the worker before the parent ends. Worker
@@ -77,8 +74,7 @@ Parent `test-passed?`/`test-failed?` query descendants and treat ignored tests a
 non-failures. The stored parent result is not equivalent: in serial execution,
 the runner marks it from direct callbacks only, treats ignored direct tests as
 non-passing, and does not propagate nested failures into that stored status.
-Do not assume that status is a recursive summary. Whether the stored-status
-behavior is intentional is unconfirmed; the test harness uses the
+Do not assume that status is a recursive summary; the test harness uses the
 descendant-query predicate.
 
 ## Assertions and reporting
