@@ -48,12 +48,15 @@ path. It uses the recursive failure predicate, not the stored parent status (see
 `build.sh` and `test.sh` share a launcher selected by `LISP_IMPL` (default SBCL).
 The launcher uses native batch/error-exit flags for SBCL, ABCL, and ECL, skips
 personal initialization, and loads the project's `init.lisp` explicitly so user
-startup configuration cannot pre-load incompatible dependencies. It exits after
-the ASDF operation rather than entering a REPL. `test.sh` preserves the Lisp
+startup configuration cannot pre-load incompatible dependencies. Startup files
+are loaded through evaluated forms: ABCL's `--load` can enter its debugger and
+return success on EOF even in batch mode, whereas `--eval` exits unsuccessfully
+on an unhandled condition. The launcher exits after the ASDF operation rather
+than entering a REPL. `test.sh` preserves the Lisp
 process exit status and optionally invokes an external HTML converter. Either a
 helper failure or a final basic-framework failure supplies `1` to the runner's
 report wrapper, which calls `uiop:quit` only after closing the report.
 
-The shell regression checks use stub Lisp and Java executables to verify launcher
-selection, arguments, and exit-status propagation independently of dependency
-installation and the Lisp test suite. They run in each CI job.
+Each CI job checks that a deliberate startup-file error exits nonzero using a
+small inline workflow step. The matrix's real builds and Lisp tests verify each
+implementation; no separate shell-test suite or mock executables are maintained.

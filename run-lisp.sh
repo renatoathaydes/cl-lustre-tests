@@ -23,5 +23,5 @@ case "${LISP_IMPL:-sbcl}" in
         ;;
 esac
 
-exec "$@" --load init.lisp --load cl-lustre-tests.asd \
+exec "$@" --eval '(load "init.lisp")' --eval '(load "cl-lustre-tests.asd")' \
     --eval "$form" --eval '(uiop:quit)'
