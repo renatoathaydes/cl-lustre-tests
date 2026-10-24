@@ -1,6 +1,6 @@
 #! /bin/sh
 
-sbcl --non-interactive --load init.lisp --load cl-lustre-tests.asd --eval '(asdf:test-system "cl-lustre-tests")'
+sbcl --no-userinit --non-interactive --load init.lisp --load cl-lustre-tests.asd --eval '(asdf:test-system "cl-lustre-tests")'
 
 exit_code=$?
 

@@ -74,7 +74,7 @@
            #:combined-test-reporter
            #:test-reporter-delegates
            ;; simple-test-sequencer slots
-           #:test-sequence-ordering
+           #:test-sequencer-ordering
            ;; expect-seq configuration
            #:*max-diff-items-to-display*
            #:*max-displayed-items-before-diff*

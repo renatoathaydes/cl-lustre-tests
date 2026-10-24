@@ -1,5 +1,23 @@
 (in-package #:lustre-tests/tests)
 
+(define-lustre-test sequencer-ordering-accessor-controls-test-and-parent-ordering
+  (let* ((first-test (make-instance 'lt:test-object :name 'first-test))
+         (second-test (make-instance 'lt:test-object :name 'second-test))
+         (first-parent (make-instance 'lt:test-parent :name 'first-parent))
+         (second-parent (make-instance 'lt:test-parent :name 'second-parent))
+         (tests (list second-test first-test))
+         (parents (list second-parent first-parent))
+         (sequencer (make-instance 'lt:simple-test-sequencer)))
+    (assert (eq :declaration-order (lt:test-sequencer-ordering sequencer)))
+    (assert (equal (list first-test second-test)
+                   (lt:sequence-tests sequencer tests)))
+    (assert (equal (list first-parent second-parent)
+                   (lt:sequence-parents sequencer parents)))
+    (setf (lt:test-sequencer-ordering sequencer) :reverse-declaration-order)
+    (assert (eq :reverse-declaration-order (lt:test-sequencer-ordering sequencer)))
+    (assert (equal tests (lt:sequence-tests sequencer tests)))
+    (assert (equal parents (lt:sequence-parents sequencer parents)))))
+
 (define-lustre-test sequences-in-declaration-order-by-default
   (with-local-root (root)
     (lt:define-test t1 () T)
