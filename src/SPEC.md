@@ -60,8 +60,12 @@ delegate. Custom evaluation must leave a non-null result.
 
 Serial traversal partitions direct tests from child parents, visiting tests first.
 The default sequencer orders each list by declaration, with reverse and random
-policies available. The current recursive traversal does not forward a custom
-sequencer into nested parents, so its selection/order is not applied recursively.
+policies available. Its public reader/writer is `test-sequencer-ordering`, matching
+the implemented accessor; the `:ordering` initarg configures its initial value.
+Changing the accessor affects both `sequence-tests` and `sequence-parents`. The
+unimplemented spelling `test-sequence-ordering` is not part of the public API.
+The current recursive traversal does not forward a custom sequencer into nested
+parents, so its selection/order is not applied recursively.
 
 Parallel traversal runs a parent's direct tests sequentially on its worker while
 traversing child parents, then joins the worker before the parent ends. Worker
@@ -107,8 +111,5 @@ The maintainer confirmed these as current gaps, not intended behavior:
 
 - XML event names are inserted into attributes without escaping, unlike failure
   reasons. Names containing XML metacharacters can invalidate the document.
-- The exported `test-sequence-ordering` symbol does not match the implemented
-  `test-sequencer-ordering` accessor. Configuration via the `:ordering` initarg is
-  present; the advertised accessor name is inconsistent.
 - The sequencer docstring says disabled tests are not run, but the implementation
   includes them in traversal and lets evaluation report them as ignored.
