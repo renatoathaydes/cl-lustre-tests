@@ -45,7 +45,9 @@ document. The runner closes the file before quitting on its explicit early-failu
 path. It uses the recursive failure predicate, not the stored parent status (see
 `lustre-tests-core`).
 
-`test.sh` preserves the Lisp process exit status and optionally invokes an external
-HTML converter. Either a helper failure or a final basic-framework failure supplies
+`test.sh` skips personal SBCL initialization while still loading the project's
+`init.lisp`, so user startup configuration cannot pre-load incompatible
+dependencies. It preserves the Lisp process exit status and optionally invokes an
+external HTML converter. Either a helper failure or a final basic-framework failure supplies
 `1` to the runner's report wrapper, which calls `uiop:quit` only after closing the
 report.
