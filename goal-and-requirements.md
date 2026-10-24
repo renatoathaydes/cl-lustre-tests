@@ -38,11 +38,12 @@ Common Lisp's `assert` and `check-type` are the normal assertion tools.
 `expect-seq` is the deliberately focused addition: useful sequence diagnostics,
 not a replacement assertion language.
 
-Portability across Common Lisp implementations is an explicit intent. Only SBCL
-is currently tested, on Linux, macOS, and Windows, because the GitHub Actions
-setup for testing other implementations is not implemented properly yet. This is
-a CI tooling limitation, not an SBCL-only support decision; other implementations
-remain unverified.
+Portability across Common Lisp implementations is an explicit intent. The CI
+matrix targets SBCL on Linux, macOS, and Windows, and ABCL and ECL on Linux and
+macOS. CLISP remains outside the matrix: its Homebrew build lacks the threading
+support required by Bordeaux Threads, and it does not support the package-local
+nicknames used by the project. Enabling it requires library portability work as
+well as installation tooling; this is not an SBCL-only support decision.
 
 Terminal/CI and REPL entry points have distinct defaults so ordinary use does not
 require building a custom runner. The core behavior and its current limitations

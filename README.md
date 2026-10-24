@@ -5,6 +5,35 @@
 The design of this library is based on a simple CLOS [protocol](src/protocol.lisp) that makes it easy to extend.
 For most users, however, things should work out-of-the-box without requiring any understanding of it at all.
 
+## Building and testing this repository
+
+Install [OCICL](https://github.com/ocicl/ocicl) and SBCL, ABCL, or ECL, then run:
+
+```sh
+ocicl setup
+ocicl install
+./build.sh
+./test.sh
+```
+
+Both scripts default to SBCL. Select another implementation with `LISP_IMPL`:
+
+```sh
+LISP_IMPL=abcl ./build.sh
+LISP_IMPL=abcl ./test.sh
+LISP_IMPL=ecl ./build.sh
+LISP_IMPL=ecl ./test.sh
+```
+
+The scripts skip personal Lisp initialization and load `init.lisp` explicitly.
+For an HTML report, use `./test.sh -html` (requires Java).
+
+CI runs SBCL on Linux, macOS, and Windows, plus ABCL and ECL on Linux and macOS.
+On Homebrew installations, ABCL may require `$(brew --prefix openjdk)/bin` at the
+front of `PATH` so it uses the Java version installed with the ABCL package.
+CLISP is not currently enabled; see the portability limitations in
+[Goals and requirements](goal-and-requirements.md#principles-and-scope).
+
 ## Getting Started
 
 Add a dependency to the `cl-lustre-tests` system to your `.asd` file:

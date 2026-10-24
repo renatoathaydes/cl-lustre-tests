@@ -45,9 +45,15 @@ document. The runner closes the file before quitting on its explicit early-failu
 path. It uses the recursive failure predicate, not the stored parent status (see
 `lustre-tests-core`).
 
-`test.sh` skips personal SBCL initialization while still loading the project's
-`init.lisp`, so user startup configuration cannot pre-load incompatible
-dependencies. It preserves the Lisp process exit status and optionally invokes an
-external HTML converter. Either a helper failure or a final basic-framework failure supplies
-`1` to the runner's report wrapper, which calls `uiop:quit` only after closing the
-report.
+`build.sh` and `test.sh` share a launcher selected by `LISP_IMPL` (default SBCL).
+The launcher uses native batch/error-exit flags for SBCL, ABCL, and ECL, skips
+personal initialization, and loads the project's `init.lisp` explicitly so user
+startup configuration cannot pre-load incompatible dependencies. It exits after
+the ASDF operation rather than entering a REPL. `test.sh` preserves the Lisp
+process exit status and optionally invokes an external HTML converter. Either a
+helper failure or a final basic-framework failure supplies `1` to the runner's
+report wrapper, which calls `uiop:quit` only after closing the report.
+
+The shell regression checks use stub Lisp and Java executables to verify launcher
+selection, arguments, and exit-status propagation independently of dependency
+installation and the Lisp test suite. They run in each CI job.
