@@ -39,11 +39,11 @@ Common Lisp's `assert` and `check-type` are the normal assertion tools.
 not a replacement assertion language.
 
 Portability across Common Lisp implementations is an explicit intent. The CI
-matrix targets SBCL on Linux, macOS, and Windows, and ABCL and ECL on Linux and
-macOS. CLISP remains outside the matrix: its Homebrew build lacks the threading
-support required by Bordeaux Threads, and it does not support the package-local
-nicknames used by the project. Enabling it requires library portability work as
-well as installation tooling; this is not an SBCL-only support decision.
+matrix targets SBCL on Linux, macOS, and Windows, and ABCL, CLISP, and ECL on
+Linux and macOS. CLISP is intentionally serial-only so stock installations without
+thread support can be used; parallel requests fall back to serial execution.
+This does not change other implementations' parallel execution. The execution
+contract is owned by `lustre-tests-core`.
 
 Terminal/CI and REPL entry points have distinct defaults so ordinary use does not
 require building a custom runner. The core behavior and its current limitations

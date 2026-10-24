@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        implementation: ['abcl', 'ecl', 'sbcl']
+        implementation: ['abcl', 'clisp', 'ecl', 'sbcl']
         os: ['ubuntu-latest', 'macos-latest']
         include:
           - implementation: sbcl
@@ -69,18 +69,6 @@ jobs:
         # Make ocicl available to subsequent GitHub Actions steps
         Add-Content -Path $env:GITHUB_PATH -Value $installDir
 
-    - name: Check startup errors fail
-      run: |
-        launcher="$PWD/run-lisp.sh"
-        work=$(mktemp -d)
-        trap 'rm -rf "$work"' EXIT
-        printf '(require "asdf")\n(error "Expected startup failure")\n' > "$work/init.lisp"
-        touch "$work/cl-lustre-tests.asd"
-        if (cd "$work" && "$launcher" '(uiop:quit 0)') < /dev/null; then
-          echo 'Lisp startup errors must exit nonzero' >&2
-          exit 1
-        fi
-
     - name: Download the open-test jar
       run: curl -o open-test.jar https://repo1.maven.org/maven2/org/opentest4j/reporting/open-test-reporting-cli/0.2.7/open-test-reporting-cli-0.2.7-standalone.jar
 
@@ -90,6 +78,19 @@ jobs:
         # retry, as downloads from ghcr.io occasionally get their connection reset
         for i in 1 2 3; do ocicl install && break; [ "$i" = 3 ] && exit 1; sleep 10; done
         ./build.sh
+
+    - name: Check startup errors fail
+      run: |
+        launcher="$PWD/run-lisp.sh"
+        work=$(mktemp -d)
+        trap 'rm -rf "$work"' EXIT
+        cp init.lisp "$work/init.lisp"
+        printf '\n(error "Expected startup failure")\n' >> "$work/init.lisp"
+        touch "$work/cl-lustre-tests.asd"
+        if (cd "$work" && "$launcher" '(uiop:quit 0)') < /dev/null; then
+          echo 'Lisp startup errors must exit nonzero' >&2
+          exit 1
+        fi
 
     - name: Run Tests
       run: ./test.sh -html

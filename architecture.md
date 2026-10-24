@@ -52,7 +52,9 @@ of tests' application state. Execution and reporting caveats belong to
 
 ## External boundaries
 
-Bordeaux Threads supplies worker threads and atomic event IDs; Alexandria supplies
+Bordeaux Threads supplies worker threads and atomic event IDs on implementations
+other than CLISP. CLISP omits this dependency and uses serial execution and event
+IDs; its execution policy is owned by `lustre-tests-core`. Alexandria supplies
 small utilities and shuffling. `edit-distance` computes sequence diffs,
 `trivial-gray-streams` supports diagnostic output streams, and `format-ansi`
 supplies color escapes. No runtime helper depends on the test harness.

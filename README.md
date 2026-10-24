@@ -7,7 +7,7 @@ For most users, however, things should work out-of-the-box without requiring any
 
 ## Building and testing this repository
 
-Install [OCICL](https://github.com/ocicl/ocicl) and SBCL, ABCL, or ECL, then run:
+Install [OCICL](https://github.com/ocicl/ocicl) and SBCL, ABCL, CLISP, or ECL, then run:
 
 ```sh
 ocicl setup
@@ -21,6 +21,8 @@ Both scripts default to SBCL. Select another implementation with `LISP_IMPL`:
 ```sh
 LISP_IMPL=abcl ./build.sh
 LISP_IMPL=abcl ./test.sh
+LISP_IMPL=clisp ./build.sh
+LISP_IMPL=clisp ./test.sh
 LISP_IMPL=ecl ./build.sh
 LISP_IMPL=ecl ./test.sh
 ```
@@ -28,11 +30,16 @@ LISP_IMPL=ecl ./test.sh
 The scripts skip personal Lisp initialization and load `init.lisp` explicitly.
 For an HTML report, use `./test.sh -html` (requires Java).
 
-CI runs SBCL on Linux, macOS, and Windows, plus ABCL and ECL on Linux and macOS.
+CI runs SBCL on Linux, macOS, and Windows, plus ABCL, CLISP, and ECL on Linux and macOS.
 On Homebrew installations, ABCL may require `$(brew --prefix openjdk)/bin` at the
 front of `PATH` so it uses the Java version installed with the ABCL package.
-CLISP is not currently enabled; see the portability limitations in
-[Goals and requirements](goal-and-requirements.md#principles-and-scope).
+For CLISP installations without bundled ASDF, `init.lisp` loads the copy installed
+by `ocicl setup`.
+
+**CLISP runs tests serially**, including when `:parallel? t` is requested. Threaded
+execution is disabled for CLISP so stock, non-threaded installations can be used;
+Bordeaux Threads is not loaded there. Other implementations retain parallel
+execution. See [Test Parallelization](#test-parallelization).
 
 ## Getting Started
 
@@ -49,7 +56,8 @@ Also, configure your `asdf:test-op` to invoke the `test` function from this syst
                          (uiop:symbol-call :lustre-tests :test))
 ```
 
-The main package is `lustre-tests`, which is a bit long, so add a nickname in your package declaration:
+The main package is `lustre-tests`, which is a bit long. On implementations with
+package-local nicknames, add a nickname in your package declaration:
 
 ```lisp
 (defpackage your-package
@@ -62,6 +70,10 @@ Or in the REPL:
 ```lisp
 CL-USER> (add-package-local-nickname :lt :lustre-tests)
 ```
+
+CLISP does not support package-local nicknames. Use fully qualified names such as
+`lustre-tests:define-test` and `lustre-tests:test-simple` in place of the `lt:`
+shorthand used below.
 
 Write a test:
 
@@ -151,6 +163,12 @@ Which, for the example above, prints:
 
 Besides being useful for test organization, using test parents also enables parallelization:
 calling the `test` functions with `:parallel? T` causes each TEST-PARENT to run its children on a separate Thread.
+
+**Exception: CLISP always runs on the calling thread.** Both `test`/`test-simple`
+with `:parallel? t` and direct calls to `dotests-parallel` fall back to serial
+traversal. This is an intentional portability choice: stock CLISP packages may
+lack thread support, and threaded CLISP builds have macOS runtime issues.
+Tests are still executed normally; only their parallel execution is disabled.
 
 > Warning: when using this option, use a TEST-REPORTER that can handle multi-threading.
   The default implementations may print overlapping results as they do not synchronize.

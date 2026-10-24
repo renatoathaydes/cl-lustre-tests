@@ -18,6 +18,8 @@ reporting. Helpers own presentation only; their dependency direction and the
 external libraries are recorded in `lustre-tests-architecture`.
 
 These contracts describe current source and test behavior, not a redesigned API.
+Internal package references use ANSI-qualified names rather than requiring
+package-local nicknames or installing process-global short aliases.
 
 ## Registration and identity
 
@@ -52,7 +54,12 @@ specialize the protocol. Durations are internal real-time ticks, not seconds.
 ## Traversal and orchestration
 
 `test` defaults to an ANSI reporter and parallel traversal; `test-simple` uses a
-plain reporter and serial traversal. Both continue after test failures by default.
+plain reporter and serial traversal. On CLISP, both explicit parallel requests
+and direct `dotests-parallel` calls delegate to serial traversal on the calling
+thread. This intentional exception permits stock CLISP without thread support
+and avoids requiring unstable threaded macOS runtime builds. Other
+implementations retain the worker-thread behavior described below. Both entry
+points continue after test failures by default.
 Each parent start precedes its direct tests and child parents; its end follows
 them. Each test has start, evaluation, and end callbacks. Reporter callbacks thread
 an opaque context through the run; combined reporters keep one context per
@@ -88,8 +95,10 @@ optional element predicate. Equality returns true; a mismatch raises continuable
 `test-done` with a failed result and a diagnostic around the first mismatch.
 Display limits bound the rendered diff, not diff computation. Control characters
 are escaped visibly; plain output marks substitutions/insertions/deletions, while
-colored output highlights them. Diff coloring is controlled independently of a
-reporter's ANSI setting.
+colored output highlights them. The diagnostic Gray stream reports its own
+visible-character column, excluding ANSI escapes, rather than assuming built-in
+string streams implement Gray-stream column queries. Diff coloring is controlled
+independently of a reporter's ANSI setting.
 
 Plain and ANSI reporters count passed/ignored/failed tests, show durations, and
 support `:full`, `:parents`, and `:quiet` modes. Failures remain visible in all
@@ -99,7 +108,8 @@ reporters do not synchronize parallel output; deterministic, non-overlapping
 reports are not guaranteed.
 
 The Open Test Reporting reporter emits started/finished events in the event XML
-format with unique atomic IDs and parent relationships. Results map to
+format with unique IDs and parent relationships. IDs use atomic counters on
+threaded implementations and a serial integer counter on CLISP. Results map to
 `SUCCESSFUL`, `SKIPPED`, or `FAILED`; failure reasons are XML-escaped. An explicit
 reporter stream overrides the runner stream. Header/footer suppression lets a
 caller enclose additional events in the same document. Combining reporters does
