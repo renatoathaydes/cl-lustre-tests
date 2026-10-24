@@ -28,11 +28,21 @@ LISP_IMPL=ecl ./test.sh
 The scripts skip personal Lisp initialization and load `init.lisp` explicitly.
 For an HTML report, use `./test.sh -html` (requires Java).
 
-CI runs SBCL on Linux, macOS, and Windows, plus ABCL and ECL on Linux and macOS.
 On Homebrew installations, ABCL may require `$(brew --prefix openjdk)/bin` at the
 front of `PATH` so it uses the Java version installed with the ABCL package.
-CLISP is not currently enabled; see the portability limitations in
-[Goals and requirements](goal-and-requirements.md#principles-and-scope).
+
+## Compatibility
+
+| Implementation | Linux | macOS | Windows |
+| --- | --- | --- | --- |
+| SBCL | CI-tested | CI-tested | CI-tested |
+| ABCL | CI-tested | CI-tested | Not CI-tested |
+| ECL | CI-tested | CI-tested | Not CI-tested |
+| CLISP[^clisp] | Unsupported | Unsupported | Unsupported |
+
+"Not CI-tested" indicates missing CI coverage, not a known incompatibility.
+
+[^clisp]: CLISP lacks package-local nicknames, and common builds omit the required thread support.
 
 ## Getting Started
 

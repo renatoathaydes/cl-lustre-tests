@@ -42,8 +42,7 @@
 
 (defmethod trivial-gray-streams:stream-line-column
     ((stream expects-output-stream))
-  (with-slots (delegate) stream
-    (trivial-gray-streams:stream-line-column delegate)))
+  (visible-chars stream))
 
 (defun print-diff (stream strings? matches prefix
                    expected-suffix actual-suffix)

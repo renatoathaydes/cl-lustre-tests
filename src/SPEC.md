@@ -88,8 +88,10 @@ optional element predicate. Equality returns true; a mismatch raises continuable
 `test-done` with a failed result and a diagnostic around the first mismatch.
 Display limits bound the rendered diff, not diff computation. Control characters
 are escaped visibly; plain output marks substitutions/insertions/deletions, while
-colored output highlights them. Diff coloring is controlled independently of a
-reporter's ANSI setting.
+colored output highlights them. The diagnostic Gray stream reports its own
+visible-character column, excluding ANSI escapes, rather than assuming built-in
+string streams implement Gray-stream column queries. Diff coloring is controlled
+independently of a reporter's ANSI setting.
 
 Plain and ANSI reporters count passed/ignored/failed tests, show durations, and
 support `:full`, `:parents`, and `:quiet` modes. Failures remain visible in all

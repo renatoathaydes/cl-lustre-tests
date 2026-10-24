@@ -197,3 +197,12 @@ Actual:   ...12 13 66 15...
          (write-string "18 " s)
          (print-colored :green "19 " s)
          (print-colored :green "20" s))))))
+
+(define-lustre-test expects-output-stream-reports-visible-column
+  (let ((stream (make-instance 'lt::expects-output-stream)))
+    (write-char #\A stream)
+    (write-char #\Newline stream)
+    (assert (= 5 (trivial-gray-streams:stream-line-column stream)))
+    (lt::with-color :red (stream)
+      (write-char #\B stream))
+    (assert (= 6 (trivial-gray-streams:stream-line-column stream)))))
