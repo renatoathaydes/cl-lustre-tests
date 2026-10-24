@@ -74,11 +74,12 @@ promised to propagate. The concurrency rationale is owned by
 `lustre-tests-architecture`.
 
 Parent `test-passed?`/`test-failed?` query descendants and treat ignored tests as
-non-failures. The stored parent result is not equivalent: the runner marks it from
-direct callbacks only, treats ignored direct tests as non-passing, and does not
-propagate nested failures into that stored status. Do not assume that status is a
-recursive summary. Whether the stored-status behavior is intentional is
-unconfirmed; the test harness uses the descendant-query predicate.
+non-failures. The stored parent result is not equivalent: in serial execution,
+the runner marks it from direct callbacks only, treats ignored direct tests as
+non-passing, and does not propagate nested failures into that stored status.
+Do not assume that status is a recursive summary. Whether the stored-status
+behavior is intentional is unconfirmed; the test harness uses the
+descendant-query predicate.
 
 ## Assertions and reporting
 
